@@ -1,0 +1,393 @@
+/* ===== Header ===== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0 1.25rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header__menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.header__menu-btn:hover {
+  background: var(--bg-hover);
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.header__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Header Navigation */
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.header__nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.header__nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.header__nav-link--active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.header__search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 1rem;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.header__icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.header__icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.header__github-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-primary);
+}
+
+.header__github-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.header__github-stars {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ===== Layout ===== */
+.layout {
+  min-height: 100vh;
+}
+
+.layout__body {
+  display: flex;
+}
+
+.layout__main {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+  min-height: calc(100vh - var(--header-height));
+  position: relative;
+  z-index: 1;
+}
+
+.layout__content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem;
+}
+
+/* ===== Platform Tabs ===== */
+.platform-tabs {
+  display: flex;
+  gap: 0;
+  margin: 0.5rem 0.75rem 0.75rem;
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  border: 1px solid var(--border-secondary);
+}
+
+.platform-tabs__btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: none;
+  border-radius: calc(var(--radius-md) - 2px);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  line-height: 1;
+}
+
+.platform-tabs__btn:hover {
+  color: var(--text-secondary);
+}
+
+.platform-tabs__btn--active {
+  background: var(--bg-primary);
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+ *  Sidebar – Android-docs style tree navigation
+ * ═══════════════════════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  overflow-y: auto;
+  border-right: 1px solid var(--border-secondary);
+  background: var(--bg-sidebar);
+  z-index: 90;
+  transition: transform var(--transition);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) transparent;
+}
+
+.sidebar__nav {
+  padding: 0.5rem 0 2rem;
+}
+
+/* ── Chevron (rotate from right-pointing to down) ── */
+.nav-chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  opacity: 0.55;
+}
+
+.nav-chevron--open {
+  transform: rotate(90deg);
+}
+
+/* ── Divider ── */
+.nav-divider {
+  height: 1px;
+  margin: 0.45rem 0.85rem;
+  background: var(--border-secondary);
+}
+
+/* ── Section header label (e.g. "ketoy-sdk") ── */
+.nav-header {
+  padding: 0.65rem 1rem 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  user-select: none;
+}
+
+/* ── Top-level & leaf links ── */
+.nav-link {
+  display: block;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.855rem;
+  line-height: 1.45;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.nav-link--active {
+  color: var(--accent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-left-color: var(--accent);
+}
+
+/* Depth-based padding for links */
+.nav-link--depth-0 {
+  padding: 0.4rem 1rem 0.4rem 1rem;
+}
+
+.nav-link--depth-1 {
+  padding: 0.3rem 1rem 0.3rem 1.65rem;
+}
+
+.nav-link--depth-2 {
+  padding: 0.28rem 1rem 0.28rem 2.3rem;
+  font-size: 0.835rem;
+}
+
+.nav-link--depth-3 {
+  padding: 0.25rem 1rem 0.25rem 2.95rem;
+  font-size: 0.82rem;
+}
+
+/* ── Collapsible section ── */
+.nav-section {
+  /* nothing special, just a grouping container */
+}
+
+.nav-section__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.855rem;
+  font-weight: 500;
+  text-align: left;
+  border-radius: 0;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  user-select: none;
+}
+
+.nav-section__toggle:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+/* Depth-based padding for section toggles */
+.nav-section__toggle--depth-0 {
+  padding-left: 1rem;
+}
+
+.nav-section__toggle--depth-1 {
+  padding-left: 1.65rem;
+  font-size: 0.835rem;
+}
+
+.nav-section__toggle--depth-2 {
+  padding-left: 2.3rem;
+  font-size: 0.82rem;
+}
+
+.nav-section__label {
+  flex: 1;
+}
+
+.nav-section__children {
+  /* just a container – indentation comes from depth classes */
+}
+
+/* ── Overlay ── */
+.sidebar-overlay {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+ *  Responsive
+ * ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header__menu-btn {
+    display: flex;
+  }
+
+  .header__nav {
+    display: none;
+  }
+
+  .header__search {
+    display: none;
+  }
+
+  .header__github-stars {
+    display: none;
+  }
+
+  .layout__main {
+    margin-left: 0;
+  }
+
+  .layout__content {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 89;
+  }
+}

@@ -1,0 +1,177 @@
+/* ===== Reference Index Page ===== */
+.ridx {
+  max-width: 960px;
+}
+
+/* Hero */
+.ridx-hero {
+  margin-bottom: 2.5rem;
+}
+
+.ridx-hero__title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem;
+}
+
+.ridx-hero__desc {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 1rem;
+  max-width: 640px;
+}
+
+.ridx-hero__stats {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ridx-stat {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 99px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
+}
+
+/* Category */
+.ridx-category {
+  margin-bottom: 2.5rem;
+}
+
+.ridx-category__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+  display: inline-block;
+}
+
+/* Subcategory */
+.ridx-subcategory {
+  margin-bottom: 1.5rem;
+}
+
+.ridx-subcategory__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin: 0 0 0.75rem;
+}
+
+/* Class Grid */
+.ridx-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Class Card */
+.ridx-class-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.ridx-class-card:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 4%, var(--bg-primary));
+  box-shadow: 0 2px 12px rgba(108, 92, 231, 0.08);
+  transform: translateY(-1px);
+}
+
+.ridx-class-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.ridx-class-card__kind {
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-secondary);
+}
+
+.ridx-class-card__annotations {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.ridx-badge {
+  display: inline-flex;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  border-radius: 4px;
+}
+
+.ridx-class-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.01em;
+}
+
+.ridx-class-card__pkg {
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-tertiary);
+  margin: 0 0 0.5rem;
+  word-break: break-all;
+}
+
+.ridx-class-card__desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.ridx-class-card__count {
+  display: inline-flex;
+  margin-top: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .ridx-hero__title {
+    font-size: 1.6rem;
+  }
+
+  .ridx-class-grid {
+    grid-template-columns: 1fr;
+  }
+}
