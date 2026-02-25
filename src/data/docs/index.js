@@ -5,6 +5,10 @@
 
 import initializationDoc from './initialization'
 import layoutsDoc from './layouts'
+import screensDoc from './screens'
+import kNavigationDoc from './knavigation'
+import testingLocallyDoc from './testing-locally'
+import productionReleaseDoc from './production-release'
 import kTextDoc from './ktext'
 import kButtonDoc from './kbutton'
 import kLayoutDoc from './klayout'
@@ -19,6 +23,10 @@ import kAdvancedDoc from './kadvanced'
 const guideDocs = {
   [initializationDoc.id]: initializationDoc,
   [layoutsDoc.id]: layoutsDoc,
+  [screensDoc.id]: screensDoc,
+  [kNavigationDoc.id]: kNavigationDoc,
+  [testingLocallyDoc.id]: testingLocallyDoc,
+  [productionReleaseDoc.id]: productionReleaseDoc,
 }
 
 /** Widget documentation entries (KText, KButton, etc.) – shown under Documentation / Components */

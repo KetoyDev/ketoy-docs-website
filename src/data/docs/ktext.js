@@ -133,7 +133,7 @@ KText("Tertiary", color = KColors.Tertiary)`,
   ],
   relatedReference: ['KUniversalScope', 'KModifier', 'KColors', 'KFontWeights', 'KTextAlign', 'KTextOverflow'],
   nextDoc: 'kbutton',
-  prevDoc: null,
+  prevDoc: 'production-release',
 }
 
 export default kTextDoc

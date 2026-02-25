@@ -32,6 +32,10 @@ const navigation = [
     children: [
       { label: 'Initialization', path: '/docs/initialization' },
       { label: 'Layouts', path: '/docs/layouts' },
+      { label: 'Screens', path: '/docs/screens' },
+      { label: 'Navigation', path: '/docs/knavigation' },
+      { label: 'Testing Locally', path: '/docs/testing-locally' },
+      { label: 'Production Release', path: '/docs/production-release' },
     ],
   },
   {
