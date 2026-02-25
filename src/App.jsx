@@ -3,6 +3,8 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import ReferenceIndex from './pages/ReferenceIndex'
 import ReferencePage from './pages/ReferencePage'
+import DocsIndex from './pages/DocsIndex'
+import DocsPage from './pages/DocsPage'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -10,6 +12,8 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/docs" element={<DocsIndex />} />
+        <Route path="/docs/:docId" element={<DocsPage />} />
         <Route path="/reference" element={<ReferenceIndex />} />
         <Route path="/reference/:classId" element={<ReferencePage />} />
         <Route path="*" element={<NotFound />} />

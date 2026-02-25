@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import referenceData from '../data/reference'
+import { getAllDocs } from '../data/docs'
 import './Search.css'
 
 function highlightMatch(text, query) {
@@ -18,29 +19,94 @@ function searchItems(query) {
   const lowerQuery = query.toLowerCase()
   const results = []
 
+  // --- Search reference data ---
   Object.entries(referenceData).forEach(([id, cls]) => {
-    const matchScore =
+    let matchScore =
       (cls.name?.toLowerCase().includes(lowerQuery) ? 10 : 0) +
       (cls.description?.toLowerCase().includes(lowerQuery) ? 5 : 0) +
       (cls.category?.toLowerCase().includes(lowerQuery) ? 3 : 0) +
       (cls.subcategory?.toLowerCase().includes(lowerQuery) ? 3 : 0) +
       (cls.android?.packageName?.toLowerCase().includes(lowerQuery) ? 2 : 0)
 
+    // Search through methods, constructors, source code
+    if (cls.methods) {
+      for (const m of cls.methods) {
+        if (m.name?.toLowerCase().includes(lowerQuery)) { matchScore += 4; break }
+        if (m.description?.toLowerCase().includes(lowerQuery)) { matchScore += 2; break }
+      }
+    }
+    if (cls.constructors) {
+      for (const c of cls.constructors) {
+        if (c.name?.toLowerCase().includes(lowerQuery)) { matchScore += 3; break }
+      }
+    }
+    if (cls.sourceCode?.toLowerCase().includes(lowerQuery)) matchScore += 1
+    if (cls.usage?.code?.toLowerCase().includes(lowerQuery)) matchScore += 2
+
     if (matchScore > 0) {
       results.push({
-        id,
+        id: `ref-${id}`,
         name: cls.name,
         description: cls.description,
-        category: cls.category,
-        subcategory: cls.subcategory,
+        badge: cls.subcategory || cls.category,
+        badgeType: 'reference',
         path: `/reference/${id}`,
-        score: matchScore
+        score: matchScore,
+      })
+    }
+  })
+
+  // --- Search documentation ---
+  const allDocs = getAllDocs()
+  allDocs.forEach((doc) => {
+    let docScore = 0
+    let matchedSection = null
+
+    // Title & description
+    if (doc.title?.toLowerCase().includes(lowerQuery)) docScore += 10
+    if (doc.description?.toLowerCase().includes(lowerQuery)) docScore += 5
+
+    // Search all sections
+    if (doc.sections) {
+      for (const section of doc.sections) {
+        let sectionScore = 0
+        if (section.title?.toLowerCase().includes(lowerQuery)) sectionScore += 6
+        if (section.content?.toLowerCase().includes(lowerQuery)) sectionScore += 4
+        if (section.code?.toLowerCase().includes(lowerQuery)) sectionScore += 3
+        // Search table rows
+        if (section.table?.rows) {
+          for (const row of section.table.rows) {
+            if (row.some(cell => cell?.toLowerCase().includes(lowerQuery))) {
+              sectionScore += 3
+              break
+            }
+          }
+        }
+        if (sectionScore > 0 && (!matchedSection || sectionScore > matchedSection.score)) {
+          matchedSection = { id: section.id, title: section.title, score: sectionScore }
+        }
+        docScore += sectionScore
+      }
+    }
+
+    if (docScore > 0) {
+      const sectionHash = matchedSection ? `#${matchedSection.id}` : ''
+      results.push({
+        id: `doc-${doc.id}`,
+        name: doc.title,
+        description: matchedSection
+          ? `Section: ${matchedSection.title}`
+          : doc.description,
+        badge: 'Docs',
+        badgeType: 'docs',
+        path: `/docs/${doc.id}${sectionHash}`,
+        score: docScore,
       })
     }
   })
 
   results.sort((a, b) => b.score - a.score)
-  return results.slice(0, 8)
+  return results.slice(0, 12)
 }
 
 export default function Search() {
@@ -110,7 +176,7 @@ export default function Search() {
           ref={inputRef}
           type="text"
           className="search__input"
-          placeholder="Search reference... (⌘K)"
+          placeholder="Search docs & reference... (⌘K)"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
@@ -136,7 +202,7 @@ export default function Search() {
             </div>
           ) : (
             <>
-              <div className="search__category">Reference ({results.length})</div>
+              <div className="search__category">Results ({results.length})</div>
               {results.map((result) => (
                 <a
                   key={result.id}
@@ -148,8 +214,8 @@ export default function Search() {
                   href={result.path}
                 >
                   <div className="search__result-header">
-                    <span className="search__result-badge search__result-badge--reference">
-                      {result.subcategory || result.category}
+                    <span className={`search__result-badge search__result-badge--${result.badgeType}`}>
+                      {result.badge}
                     </span>
                     <span className="search__result-title">{highlightMatch(result.name, query)}</span>
                   </div>

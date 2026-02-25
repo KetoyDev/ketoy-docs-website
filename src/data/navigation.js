@@ -19,6 +19,41 @@ const navigation = [
   },
   {
     type: 'header',
+    label: 'Documentation',
+  },
+  {
+    type: 'link',
+    label: 'All Guides',
+    path: '/docs',
+  },
+  {
+    type: 'section',
+    label: 'guides',
+    children: [
+      { label: 'Initialization', path: '/docs/initialization' },
+      { label: 'Layouts', path: '/docs/layouts' },
+    ],
+  },
+  {
+    type: 'section',
+    label: 'components',
+    children: [
+      { label: 'KText', path: '/docs/ktext' },
+      { label: 'KButton & KIconButton', path: '/docs/kbutton' },
+      { label: 'KColumn, KRow & KBox', path: '/docs/klayout' },
+      { label: 'KCard', path: '/docs/kcard' },
+      { label: 'KImage & KIcon', path: '/docs/kmedia' },
+      { label: 'KTextField', path: '/docs/kinput' },
+      { label: 'KScaffold & Navigation', path: '/docs/kscaffold' },
+      { label: 'KLazyColumn & KLazyRow', path: '/docs/klists' },
+      { label: 'Advanced Builders', path: '/docs/kadvanced' },
+    ],
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'header',
     label: 'ketoy-sdk',
   },
   {

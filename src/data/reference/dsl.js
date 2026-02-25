@@ -73,14 +73,14 @@ val nodes = scope.children // [KTextNode(...)]`,
     fun KText(
         text: String,
         modifier: KModifier? = null,
-        fontSize: String? = null,
+        fontSize: Int? = null,
         fontWeight: String? = null,
         color: String? = null,
         textAlign: String? = null,
         maxLines: Int? = null,
         overflow: String? = null,
-        letterSpacing: String? = null,
-        lineHeight: String? = null
+        letterSpacing: Float? = null,
+        lineHeight: Float? = null
     ) { addChild(KTextNode(...)) }
 
     // ── Button ──
@@ -90,7 +90,7 @@ val nodes = scope.children // [KTextNode(...)]`,
         enabled: Boolean = true,
         containerColor: String? = null,
         contentColor: String? = null,
-        elevation: String? = null,
+        elevation: Int? = null,
         shape: String? = null,
         actionId: String? = null,
         content: KUniversalScope.() -> Unit
@@ -123,8 +123,8 @@ val nodes = scope.children // [KTextNode(...)]`,
         shape: String? = null,
         containerColor: String? = null,
         contentColor: String? = null,
-        elevation: String? = null,
-        border: String? = null,
+        elevation: Int? = null,
+        border: KBorder? = null,
         onClick: (() -> Unit)? = null,
         enabled: Boolean = true,
         actionId: String? = null,
@@ -138,32 +138,31 @@ val nodes = scope.children // [KTextNode(...)]`,
       { name: 'children', type: 'MutableList<KNode>', default: 'mutableListOf()', description: 'Inherited from KScope. Stores the accumulated child nodes.' },
     ],
     methods: [
-      { name: 'KText(text: String, modifier: KModifier?, fontSize: String?, fontWeight: String?, color: String?, textAlign: String?, maxLines: Int?, overflow: String?, letterSpacing: String?, lineHeight: String?)', returns: 'Unit', description: 'Adds a text node. Supports Material 3 typography properties and theme color references.' },
-      { name: 'KButton(modifier: KModifier?, onClick: (() -> Unit)?, enabled: Boolean, containerColor: String?, contentColor: String?, elevation: String?, shape: String?, actionId: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a button with customizable appearance and an onClick handler (registered via ActionRegistry).' },
+      { name: 'KText(text: String, modifier: KModifier?, fontSize: Int?, fontWeight: String?, color: String?, textAlign: String?, maxLines: Int?, overflow: String?, letterSpacing: Float?, lineHeight: Float?)', returns: 'Unit', description: 'Adds a text node. Supports Material 3 typography properties and theme color references.' },
+      { name: 'KButton(modifier: KModifier?, onClick: (() -> Unit)?, enabled: Boolean, containerColor: String?, contentColor: String?, elevation: Int?, shape: String?, actionId: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a button with customizable appearance and an onClick handler (registered via ActionRegistry).' },
       { name: 'KColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a vertical layout container (maps to Compose Column).' },
       { name: 'KRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a horizontal layout container (maps to Compose Row).' },
       { name: 'KBox(modifier: KModifier?, contentAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a box layout container (maps to Compose Box).' },
-      { name: 'KLazyColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: String?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'Unit', description: 'Adds a lazily-loaded vertical scrolling list.' },
-      { name: 'KLazyRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: String?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'Unit', description: 'Adds a lazily-loaded horizontal scrolling list.' },
-      { name: 'KSpacer(modifier: KModifier?, width: String?, height: String?)', returns: 'Unit', description: 'Adds an empty spacer node for layout spacing.' },
+      { name: 'KLazyColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: KPadding?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'Unit', description: 'Adds a lazily-loaded vertical scrolling list.' },
+      { name: 'KLazyRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: KPadding?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'Unit', description: 'Adds a lazily-loaded horizontal scrolling list.' },
+      { name: 'KSpacer(modifier: KModifier?, width: Int?, height: Int?)', returns: 'Unit', description: 'Adds an empty spacer node for layout spacing.' },
       { name: 'KTextField(value: String, onValueChange: ((String) -> Unit)?, modifier: KModifier?, ..., content: KTextFieldScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 text input field with slot-based configuration via KTextFieldScope.' },
-      { name: 'KImage(source: String, modifier: KModifier?, contentDescription: String?, scaleType: String?)', returns: 'Unit', description: 'Adds an image node. Source can be a URL, asset path, or resource reference.' },
-      { name: 'KIcon(icon: String, modifier: KModifier?, size: String?, color: String?, style: String?, contentDescription: String?)', returns: 'Unit', description: 'Adds an icon from a string name (resolved via KIcons registry).' },
-      { name: 'KIcon(icon: KIconRef, modifier: KModifier?, size: String?, color: String?, contentDescription: String?)', returns: 'Unit', description: 'Adds an icon from a typed KIconRef reference.' },
+      { name: 'KImage(source: KImageSource, modifier: KModifier?, contentDescription: String?, scaleType: String?)', returns: 'Unit', description: 'Adds an image node. Source is a KImageSource: KUrlImageSource, KResImageSource, KBase64ImageSource, or KIconImageSource.' },
+      { name: 'KIcon(icon: String, modifier: KModifier?, size: Int?, color: String?, style: String?, contentDescription: String?)', returns: 'Unit', description: 'Adds an icon from a string name (resolved via KIcons registry).' },
+      { name: 'KIcon(icon: KIconRef, modifier: KModifier?, size: Int?, color: String?, contentDescription: String?)', returns: 'Unit', description: 'Adds an icon from a typed KIconRef reference.' },
       { name: 'KIconButton(icon: String, onClick: (() -> Unit)?, modifier: KModifier?, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a clickable icon button using a string icon name.' },
       { name: 'KIconButton(icon: KIconRef, onClick: (() -> Unit)?, modifier: KModifier?, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a clickable icon button using a typed KIconRef.' },
-      { name: 'KCard(modifier: KModifier?, shape: String?, containerColor: String?, contentColor: String?, elevation: String?, border: String?, onClick: (() -> Unit)?, enabled: Boolean, actionId: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 card container with optional click handling.' },
+      { name: 'KCard(modifier: KModifier?, shape: String?, containerColor: String?, contentColor: String?, elevation: Int?, border: KBorder?, onClick: (() -> Unit)?, enabled: Boolean, actionId: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 card container with optional click handling.' },
       { name: 'KComponent(name: String, modifier: KModifier?, vararg properties: Pair<String, Any?>, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a custom registered component by name with vararg property pairs.' },
       { name: 'KComponent(name: String, properties: Map<String, Any?>, props: Map<String, Any?>, modifier: KModifier?, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a custom registered component by name with Map-based properties.' },
       { name: 'KComponentSmart(name: String, properties: Map<String, Any?>, modifier: KModifier?, autoLoad: Boolean, showError: Boolean)', returns: 'Unit', description: 'Adds a smart component that auto-resolves its renderer from the widget registry.' },
-      { name: 'KFunctionCall(functionName: String, vararg arguments: Pair<String, Any?>)', returns: 'String', description: 'Serializes a function call node with vararg argument pairs. Returns the generated action ID.' },
-      { name: 'KFunctionCall(functionName: String, arguments: Map<String, Any?>)', returns: 'String', description: 'Serializes a function call node with Map-based arguments. Returns the generated action ID.' },
+      { name: 'ActionRegistry.register(actionId: String, action: () -> Unit)', returns: 'Unit', description: 'Registers a named action in the host app. Buttons with matching actionId will invoke this action.' },
       { name: 'KScaffold(modifier: KModifier?, containerColor: String?, contentColor: String?, ..., topBar: (KScaffoldScope.() -> Unit)?, bottomBar: (KScaffoldScope.() -> Unit)?, snackbarHost: (KScaffoldScope.() -> Unit)?, floatingActionButton: (KScaffoldScope.() -> Unit)?, floatingActionButtonPosition: String?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 scaffold layout with slots for top bar, bottom bar, FAB, and snackbar host.' },
       { name: 'KTopAppBar(modifier: KModifier?, colors: String?, windowInsets: String?, scrollBehavior: String?, type: String?, expandedHeight: String?, title: (KAppBarScope.() -> Unit)?, navigationIcon: (KAppBarScope.() -> Unit)?, actions: (KAppBarScope.() -> Unit)?)', returns: 'Unit', description: 'Adds a Material 3 top app bar. Type can be "small", "medium", or "large".' },
       { name: 'KBottomAppBar(modifier: KModifier?, containerColor: String?, contentColor: String?, ..., content: KAppBarScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 bottom app bar.' },
-      { name: 'KNavigationBar(modifier: KModifier?, containerColor: String?, contentColor: String?, tonalElevation: String?, windowInsets: String?, content: KNavigationScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 bottom navigation bar with navigation items defined via KNavigationScope.' },
+      { name: 'KNavigationBar(modifier: KModifier?, containerColor: String?, contentColor: String?, tonalElevation: Int?, windowInsets: String?, content: KNavigationScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 bottom navigation bar with navigation items defined via KNavigationScope.' },
       { name: 'KNavigationRail(modifier: KModifier?, containerColor: String?, contentColor: String?, windowInsets: String?, header: (KUniversalScope.() -> Unit)?, content: KNavigationRailScope.() -> Unit)', returns: 'Unit', description: 'Adds a Material 3 navigation rail with items defined via KNavigationRailScope.' },
-      { name: 'KFloatingActionButton(onClick: (() -> Unit)?, modifier: KModifier?, shape: String?, containerColor: String?, contentColor: String?, elevation: String?, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a floating action button.' },
+      { name: 'KFloatingActionButton(onClick: (() -> Unit)?, modifier: KModifier?, shape: String?, containerColor: String?, contentColor: String?, elevation: Int?, ..., content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a floating action button.' },
       { name: 'KSnackBar(modifier: KModifier?, ..., message: String?, duration: String?, action: (KSnackBarScope.() -> Unit)?, dismissAction: (KSnackBarScope.() -> Unit)?)', returns: 'Unit', description: 'Adds a snackbar with configurable message, duration, and action/dismiss slots.' },
       { name: 'KModalBottomSheet(onDismissRequest: (() -> Unit)?, modifier: KModifier?, ..., dragHandle: (KUniversalScope.() -> Unit)?, content: KUniversalScope.() -> Unit)', returns: 'Unit', description: 'Adds a modal bottom sheet overlay.' },
       { name: 'KSnackBarHost(hostState: String?, modifier: KModifier?, snackbar: (KSnackBarScope.() -> Unit)?)', returns: 'Unit', description: 'Adds a snackbar host that manages display of snackbars within a scaffold.' },
@@ -181,8 +180,8 @@ val nodes = scope.children // [KTextNode(...)]`,
 val root = KColumn {
     KText(
         text = "Welcome to Ketoy",
-        fontSize = "24sp",
-        fontWeight = "Bold",
+        fontSize = 24,
+        fontWeight = KFontWeights.Bold,
         color = KColors.Primary
     )
     KButton(
@@ -194,12 +193,12 @@ val root = KColumn {
     }
     KRow(horizontalArrangement = KArrangements.SpaceBetween) {
         KIcon(icon = KIcons.Home, color = KColors.Primary)
-        KSpacer(width = "8dp")
+        KSpacer(width = 8)
         KText("Home")
     }
     KCard(
-        modifier = kModifier { padding("16dp") },
-        elevation = "4dp",
+        modifier = KModifier(padding = 16),
+        elevation = 4,
         shape = KShapes.Medium
     ) {
         KText("Card Content")
@@ -296,14 +295,14 @@ val root = KColumn {
       { name: 'items(count: Int, itemContent: KUniversalScope.(Int) -> Unit)', returns: 'Unit', description: 'Adds count item nodes by index.' },
     ],
     usage: `KLazyColumn(
-    modifier = kModifier { fillMaxSize() },
-    verticalArrangement = KArrangements.spacedBy("8dp")
+    modifier = KModifier(fillMaxSize = 1f),
+    verticalArrangement = KArrangements.spacedBy(8)
 ) {
     item {
-        KText("Header", fontWeight = "Bold", fontSize = "20sp")
+        KText("Header", fontWeight = KFontWeights.Bold, fontSize = 20)
     }
     items(userList) { user ->
-        KCard(modifier = kModifier { padding("8dp") }) {
+        KCard(modifier = KModifier(padding = 8)) {
             KText(user.name)
             KText(user.email, color = KColors.OnSurfaceVariant)
         }
@@ -311,7 +310,7 @@ val root = KColumn {
     itemsIndexed(userList) { index, user ->
         KRow {
             KText("\${index + 1}.")
-            KSpacer(width = "4dp")
+            KSpacer(width = 4)
             KText(user.name)
         }
     }
@@ -450,7 +449,7 @@ val root = KColumn {
     topBar = {
         // 'this' is KScaffoldScope → all KUniversalScope builders available
         KTopAppBar(type = "medium") {
-            KText("My App", fontWeight = "Bold")
+            KText("My App", fontWeight = KFontWeights.Bold)
         }
     },
     bottomBar = {
@@ -469,7 +468,7 @@ val root = KColumn {
         }
     }
 ) {
-    KColumn(modifier = kModifier { padding("16dp") }) {
+    KColumn(modifier = KModifier(padding = 16)) {
         KText("Scaffold body content")
     }
 }`,
@@ -528,7 +527,7 @@ val root = KColumn {
     ],
     usage: `KTopAppBar(
     title = {
-        KText("My Screen", fontWeight = "Bold")
+        KText("My Screen", fontWeight = KFontWeights.Bold)
     },
     navigationIcon = {
         KIconButton(onClick = { navigateBack() }) {
@@ -704,7 +703,7 @@ val root = KColumn {
     },
     dismissAction = {
         KSnackBarDismiss(onClick = { dismissSnackbar() }) {
-            KIcon(icon = KIcons.Close, size = "16dp")
+            KIcon(icon = KIcons.Close, size = 16)
         }
     }
 )`,
@@ -842,7 +841,7 @@ fun KLazyColumn(
     horizontalAlignment: String? = null,
     userScrollEnabled: Boolean? = null,
     reverseLayout: Boolean? = null,
-    contentPadding: String? = null,
+    contentPadding: Int? = null,
     beyondBoundsItemCount: Int? = null,
     content: KLazyListScope.() -> Unit
 ): KLazyColumnNode {
@@ -860,7 +859,7 @@ fun KLazyRow(
     verticalAlignment: String? = null,
     userScrollEnabled: Boolean? = null,
     reverseLayout: Boolean? = null,
-    contentPadding: String? = null,
+    contentPadding: Int? = null,
     beyondBoundsItemCount: Int? = null,
     content: KLazyListScope.() -> Unit
 ): KLazyRowNode {
@@ -901,8 +900,8 @@ fun KScaffold(
       { name: 'KColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'KColumnNode', description: 'Creates a root-level column node tree.' },
       { name: 'KRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'KRowNode', description: 'Creates a root-level row node tree.' },
       { name: 'KBox(modifier: KModifier?, contentAlignment: String?, content: KUniversalScope.() -> Unit)', returns: 'KBoxNode', description: 'Creates a root-level box node tree.' },
-      { name: 'KLazyColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: String?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'KLazyColumnNode', description: 'Creates a root-level lazy column node tree.' },
-      { name: 'KLazyRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: String?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'KLazyRowNode', description: 'Creates a root-level lazy row node tree.' },
+      { name: 'KLazyColumn(modifier: KModifier?, verticalArrangement: String?, horizontalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: Int?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'KLazyColumnNode', description: 'Creates a root-level lazy column node tree.' },
+      { name: 'KLazyRow(modifier: KModifier?, horizontalArrangement: String?, verticalAlignment: String?, userScrollEnabled: Boolean?, reverseLayout: Boolean?, contentPadding: Int?, beyondBoundsItemCount: Int?, content: KLazyListScope.() -> Unit)', returns: 'KLazyRowNode', description: 'Creates a root-level lazy row node tree.' },
       { name: 'KScaffold(modifier: KModifier?, containerColor: String?, contentColor: String?, contentWindowInsets: KWindowInsets?, topBar: (KScaffoldScope.() -> Unit)?, bottomBar: (KScaffoldScope.() -> Unit)?, snackbarHost: (KScaffoldScope.() -> Unit)?, floatingActionButton: (KScaffoldScope.() -> Unit)?, floatingActionButtonPosition: String?, content: KUniversalScope.() -> Unit)', returns: 'KScaffoldNode', description: 'Creates a root-level scaffold node tree with all slot content.' },
     ],
     usage: `// Create a standalone node tree for serialization
@@ -916,8 +915,8 @@ val screenNode = KScaffold(
         }
     }
 ) {
-    KColumn(modifier = kModifier { padding("16dp").fillMaxSize() }) {
-        KText("Hello, Ketoy!", fontSize = "24sp")
+    KColumn(modifier = KModifier(padding = 16, fillMaxSize = 1f)) {
+        KText("Hello, Ketoy!", fontSize = 24)
         KButton(onClick = { }) {
             KText("Get Started")
         }
@@ -929,7 +928,7 @@ val json = screenNode.toJson()
 
 // Or create a simple column
 val column = KColumn(
-    verticalArrangement = KArrangements.spacedBy("12dp"),
+    verticalArrangement = KArrangements.spacedBy(12),
     horizontalAlignment = KAlignments.CenterHorizontally
 ) {
     KText("Item 1")
@@ -1194,8 +1193,8 @@ val customWidgets = ketoyWidgets {
             KScaffold(
                 topBar = { KTopAppBar(title = { KText("Home") }) }
             ) {
-                KColumn(modifier = kModifier { padding("16dp") }) {
-                    KText("Welcome!", fontSize = "24sp")
+                KColumn(modifier = KModifier(padding = 16)) {
+                    KText("Welcome!", fontSize = 24)
                 }
             }
         }
@@ -1289,13 +1288,13 @@ screen("dashboard") {
     description("Analytics dashboard with charts")
     version("2.1")
     dsl {
-        KColumn(modifier = kModifier { fillMaxSize().padding("16dp") }) {
-            KText("Dashboard", fontSize = "28sp", fontWeight = "Bold")
-            KSpacer(height = "16dp")
-            KCard(elevation = "2dp") {
+        KColumn(modifier = KModifier(fillMaxSize = 1f, padding = 16)) {
+            KText("Dashboard", fontSize = 28, fontWeight = KFontWeights.Bold)
+            KSpacer(height = 16)
+            KCard(elevation = 2) {
                 KText("Revenue: \$12,345")
             }
-            KCard(elevation = "2dp") {
+            KCard(elevation = 2) {
                 KText("Users: 1,234")
             }
         }

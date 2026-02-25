@@ -37,7 +37,10 @@ export default function Home() {
             Build dynamic, cloud-managed screens with caching, navigation, and a powerful component registry.
           </p>
           <div className="home__actions">
-            <Link to="/reference" className="home__btn home__btn--primary">
+            <Link to="/docs" className="home__btn home__btn--primary">
+              Documentation
+            </Link>
+            <Link to="/reference" className="home__btn home__btn--secondary">
               API Reference
             </Link>
             <a

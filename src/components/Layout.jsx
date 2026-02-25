@@ -36,6 +36,7 @@ function Header({ onMenuToggle, menuOpen }) {
   }, [])
 
   const isReferenceActive = location.pathname.startsWith('/reference') || location.pathname === '/'
+  const isDocsActive = location.pathname.startsWith('/docs')
 
   return (
     <header className="header">
@@ -59,6 +60,9 @@ function Header({ onMenuToggle, menuOpen }) {
       </div>
 
       <nav className="header__nav">
+        <NavLink to="/docs" className={`header__nav-link ${isDocsActive ? 'header__nav-link--active' : ''}`}>
+          Docs
+        </NavLink>
         <NavLink to="/" className={`header__nav-link ${isReferenceActive ? 'header__nav-link--active' : ''}`}>
           Reference
         </NavLink>
