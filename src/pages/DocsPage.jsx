@@ -225,71 +225,78 @@ export default function DocsPage() {
         <p className="docs-header__desc">{doc.description}</p>
       </div>
 
-      {/* Table of Contents – guide pages only */}
-      {!isWidgetDoc && toc.length > 2 && (
-        <nav className="docs-toc">
-          <h4 className="docs-toc__title">On this page</h4>
-          <ul className="docs-toc__list">
-            {toc.map(item => (
-              <li key={item.id}>
-                <a
-                  href={`#${item.id}`}
-                  className="docs-toc__link"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                >
-                  {item.title}
-                </a>
-              </li>
+      {/* Body: main content + On This Page sidebar */}
+      <div className="docs-page__body">
+        <div className="docs-page__main">
+          {/* Content sections */}
+          <div className="docs-content">
+            {doc.sections.map(section => (
+              <DocSection key={section.id} section={section} />
             ))}
-          </ul>
-        </nav>
-      )}
+          </div>
 
-      {/* Content sections */}
-      <div className="docs-content">
-        {doc.sections.map(section => (
-          <DocSection key={section.id} section={section} />
-        ))}
-      </div>
+          {/* Related Reference */}
+          {doc.relatedReference && doc.relatedReference.length > 0 && (
+            <div className="docs-related">
+              <h3 className="docs-related__title">Related API Reference</h3>
+              <div className="docs-related__tags">
+                {doc.relatedReference.map(ref => {
+                  const refClass = getClassById(ref)
+                  if (!refClass) return (
+                    <span key={ref} className="docs-related__tag docs-related__tag--missing">{ref}</span>
+                  )
+                  return (
+                    <Link key={ref} to={`/reference/${ref}`} className="docs-related__tag">
+                      {ref}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
-      {/* Related Reference */}
-      {doc.relatedReference && doc.relatedReference.length > 0 && (
-        <div className="docs-related">
-          <h3 className="docs-related__title">Related API Reference</h3>
-          <div className="docs-related__tags">
-            {doc.relatedReference.map(ref => {
-              const refClass = getClassById(ref)
-              if (!refClass) return (
-                <span key={ref} className="docs-related__tag docs-related__tag--missing">{ref}</span>
-              )
-              return (
-                <Link key={ref} to={`/reference/${ref}`} className="docs-related__tag">
-                  {ref}
-                </Link>
-              )
-            })}
+          {/* Prev / Next navigation */}
+          <div className="docs-nav-footer">
+            {prevDoc ? (
+              <Link to={`/docs/${prevDoc.id}`} className="docs-nav-footer__link docs-nav-footer__link--prev">
+                <span className="docs-nav-footer__dir">← Previous</span>
+                <span className="docs-nav-footer__label">{prevDoc.title}</span>
+              </Link>
+            ) : <div />}
+            {nextDoc ? (
+              <Link to={`/docs/${nextDoc.id}`} className="docs-nav-footer__link docs-nav-footer__link--next">
+                <span className="docs-nav-footer__dir">Next →</span>
+                <span className="docs-nav-footer__label">{nextDoc.title}</span>
+              </Link>
+            ) : <div />}
           </div>
         </div>
-      )}
 
-      {/* Prev / Next navigation */}
-      <div className="docs-nav-footer">
-        {prevDoc ? (
-          <Link to={`/docs/${prevDoc.id}`} className="docs-nav-footer__link docs-nav-footer__link--prev">
-            <span className="docs-nav-footer__dir">← Previous</span>
-            <span className="docs-nav-footer__label">{prevDoc.title}</span>
-          </Link>
-        ) : <div />}
-        {nextDoc ? (
-          <Link to={`/docs/${nextDoc.id}`} className="docs-nav-footer__link docs-nav-footer__link--next">
-            <span className="docs-nav-footer__dir">Next →</span>
-            <span className="docs-nav-footer__label">{nextDoc.title}</span>
-          </Link>
-        ) : <div />}
-      </div>
-    </motion.div>
-  )
-}
+                {/* On This Page – sticky right sidebar (guide pages only) */}
+                {!isWidgetDoc && toc.length > 2 && (
+                  <aside className="docs-page__toc">
+                    <nav className="docs-toc">
+                      <h4 className="docs-toc__title">On this page</h4>
+                      <ul className="docs-toc__list">
+                        {toc.map(item => (
+                          <li key={item.id}>
+                            <a
+                              href={`#${item.id}`}
+                              className="docs-toc__link"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })
+                              }}
+                            >
+                              {item.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  </aside>
+                )}
+              </div>
+            </motion.div>
+          )
+        }

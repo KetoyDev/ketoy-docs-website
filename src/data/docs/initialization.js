@@ -41,7 +41,6 @@ JSONStringToUI(value = myJsonString)`,
     context: Context? = null,
     widgetParsers: List<KetoyWidgetParser<*>> = emptyList(),
     actionParsers: List<KetoyActionParser<*>> = emptyList(),
-    screens: List<KetoyScreen> = emptyList(),
     cloudConfig: KetoyCloudConfig? = null,
     cacheConfig: KetoyCacheConfig = KetoyCacheConfig.DEFAULT,
     force: Boolean = false
@@ -58,7 +57,6 @@ JSONStringToUI(value = myJsonString)`,
           ['context', 'Context?', 'null', 'Android context. Required when cloudConfig is set (needed for network and cache). Pass applicationContext.'],
           ['widgetParsers', 'List<KetoyWidgetParser<*>>', 'emptyList()', 'Custom widget parsers to register. Each parser handles rendering a custom component type from JSON.'],
           ['actionParsers', 'List<KetoyActionParser<*>>', 'emptyList()', 'Custom action parsers to register. Each parser handles executing a custom action triggered from the UI.'],
-          ['screens', 'List<KetoyScreen>', 'emptyList()', 'Pre-built screens to register (legacy). Prefer using ProvideKetoyScreen composable directly in your composable tree instead.'],
           ['cloudConfig', 'KetoyCloudConfig?', 'null', 'Cloud configuration for connecting to the Ketoy backend. When null, cloud features are disabled.'],
           ['cacheConfig', 'KetoyCacheConfig', 'KetoyCacheConfig.DEFAULT', 'Cache configuration controlling how fetched screens are persisted and refreshed.'],
           ['force', 'Boolean', 'false', 'When true, re-initializes even if already initialized. Useful for testing or hot-reload scenarios.'],
@@ -166,16 +164,8 @@ Ketoy.initialize(
     {
       id: 'screens',
       title: 'Registering Screens',
-      content: `There are two ways to register screens in Ketoy:
-
-**1. ProvideKetoyScreen (Recommended)**
-
-The modern and recommended approach is to use \`ProvideKetoyScreen\` directly in your composable tree. This composable creates (or retrieves) a \`KetoyScreen\` and provides it to child composables via \`LocalKetoyScreen\`. Each screen can contain one or more \`KetoyContent\` blocks interleaved with native Compose code.
-
-**2. screens parameter in Ketoy.initialize() (Legacy)**
-
-The \`screens\` parameter in \`Ketoy.initialize()\` still exists and works — screens can be pre-registered from JSON strings or builder functions. However, this is the older approach. Prefer \`ProvideKetoyScreen\` for new code.`,
-      code: `// ✅ Recommended: ProvideKetoyScreen composable
+      content: `Use \`ProvideKetoyScreen\` directly in your composable tree to register screens. This composable creates (or retrieves) a \`KetoyScreen\` and provides it to child composables via \`LocalKetoyScreen\`. Each screen can contain one or more \`KetoyContent\` blocks interleaved with native Compose code.`,
+      code: `// ProvideKetoyScreen composable
 @Composable
 fun HomeScreen() {
     ProvideKetoyScreen(screenName = "home") {
@@ -191,15 +181,7 @@ fun DashboardScreen() {
         Text("Native Compose section")
         KetoyContent(name = "transactions", nodeBuilder = { buildTxns() })
     }
-}
-
-// ⚠️ Legacy: screens parameter in Ketoy.initialize()
-Ketoy.initialize(
-    screens = listOf(
-        KetoyScreen.fromJson("home", homeJsonString),
-        KetoyScreen.fromNode("profile") { buildProfileUI() }
-    )
-)`,
+}`,
       language: 'kotlin',
     },
     {
@@ -221,11 +203,6 @@ Ketoy.initialize(
                 ShowToastParser(),
                 OpenUrlParser(),
                 AnalyticsEventParser()
-            ),
-            screens = listOf(
-                KetoyScreen.fromJson("home", homeJson),
-                KetoyScreen.fromJson("settings", settingsJson),
-                KetoyScreen.fromNode("profile") { buildProfileUI() }
             ),
             cloudConfig = KetoyCloudConfig(
                 apiKey = BuildConfig.KETOY_API_KEY,
@@ -288,7 +265,7 @@ Ketoy.initialize(
       language: 'kotlin',
     },
   ],
-  relatedReference: ['Ketoy', 'KetoyCloudConfig', 'KetoyCacheConfig', 'KetoyCloudService', 'KetoyScreen', 'ProvideKetoyScreen', 'KetoyContent', 'KetoyWidgetParser', 'KetoyActionParser'],
+  relatedReference: ['Ketoy', 'KetoyCloudConfig', 'KetoyCacheConfig', 'KetoyCloudService', 'ProvideKetoyScreen', 'KetoyContent', 'KetoyWidgetParser', 'KetoyActionParser'],
   nextDoc: 'layouts',
   prevDoc: null,
 }
