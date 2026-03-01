@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaCloud, FaCubes, FaBolt } from 'react-icons/fa'
 import { getAllClasses, getClassesByCategory } from '../data/reference'
+import CodeBlock from '../components/CodeBlock'
 import './Home.css'
 
 const fadeUp = {
@@ -105,6 +106,92 @@ export default function Home() {
               <span>{p.version}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Installation */}
+      <section className="home__install">
+        <h2>Installation</h2>
+        <p className="home__gallery-sub">
+          Add Ketoy to your Android project. Always use the{' '}
+          <strong>latest version</strong>{' '}—{' '}
+          <a
+            href="https://central.sonatype.com/artifact/dev.ketoy/sdk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="home__install-maven-link"
+          >
+            check Maven Central for the latest release ↗
+          </a>
+        </p>
+
+        {/* Format table */}
+        <div className="home__install-table-wrap">
+          <table className="home__install-table">
+            <thead>
+              <tr>
+                <th>Build System</th>
+                <th>Config File</th>
+                <th>Latest Version</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Kotlin DSL</td>
+                <td><code>build.gradle.kts</code></td>
+                <td><code>0.1-beta</code></td>
+              </tr>
+              <tr>
+                <td>Groovy DSL</td>
+                <td><code>build.gradle</code></td>
+                <td><code>0.1-beta</code></td>
+              </tr>
+              <tr>
+                <td>Version Catalog (TOML)</td>
+                <td><code>libs.versions.toml</code></td>
+                <td><code>0.1-beta</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Code blocks */}
+        <div className="home__install-blocks">
+          <h4 className="home__install-format-label">Kotlin DSL</h4>
+          <CodeBlock
+            code={`dependencies {
+    implementation("dev.ketoy:sdk:0.1-beta")
+}`}
+            language="kotlin"
+            title="build.gradle.kts"
+          />
+
+          <h4 className="home__install-format-label">Groovy DSL</h4>
+          <CodeBlock
+            code={`dependencies {
+    implementation 'dev.ketoy:sdk:0.1-beta'
+}`}
+            language="groovy"
+            title="build.gradle"
+          />
+
+          <h4 className="home__install-format-label">Version Catalog (TOML)</h4>
+          <CodeBlock
+            code={`[versions]
+ketoy = "0.1-beta"
+
+[libraries]
+ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`}
+            language="toml"
+            title="libs.versions.toml"
+          />
+          <CodeBlock
+            code={`dependencies {
+    implementation(libs.ketoy.sdk)
+}`}
+            language="kotlin"
+            title="build.gradle.kts"
+          />
         </div>
       </section>
 

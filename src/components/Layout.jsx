@@ -50,11 +50,7 @@ function Header({ onMenuToggle, menuOpen }) {
           </svg>
         </button>
         <NavLink to="/" className="header__logo">
-          <svg width="26" height="26" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="10" fill="url(#lg)" />
-            <text x="50%" y="54%" textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="14" fontWeight="700" fontFamily="Inter, sans-serif">K</text>
-            <defs><linearGradient id="lg" x1="0" y1="0" x2="40" y2="40"><stop stopColor="#6C5CE7" /><stop offset="1" stopColor="#a78bfa" /></linearGradient></defs>
-          </svg>
+          <img src="/ketoy-logo.svg" alt="Ketoy" width="28" height="28" style={{ borderRadius: 6 }} />
           <span className="header__title">Ketoy Docs</span>
         </NavLink>
       </div>
@@ -73,7 +69,7 @@ function Header({ onMenuToggle, menuOpen }) {
       </div>
 
       <div className="header__right">
-        <span className="badge">v1.0.0-alpha</span>
+        <span className="badge">v0.1-beta</span>
         <a
           href="https://github.com/KetoyDev/ketoy"
           target="_blank"

@@ -6,6 +6,7 @@ import ReferencePage from './pages/ReferencePage'
 import DocsIndex from './pages/DocsIndex'
 import DocsPage from './pages/DocsPage'
 import NotFound from './pages/NotFound'
+import Security from './pages/Security'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/docs/:docId" element={<DocsPage />} />
         <Route path="/reference" element={<ReferenceIndex />} />
         <Route path="/reference/:classId" element={<ReferencePage />} />
+        <Route path="/security" element={<Security />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

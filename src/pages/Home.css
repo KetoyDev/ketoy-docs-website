@@ -274,6 +274,86 @@
   color: var(--text-primary);
 }
 
+/* Install table */
+.home__install-table-wrap {
+  overflow-x: auto;
+  margin: 1.2rem 0 1.6rem;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+}
+
+.home__install-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.home__install-table th {
+  text-align: left;
+  padding: 0.65rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.home__install-table td {
+  padding: 0.7rem 1rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-secondary);
+  vertical-align: middle;
+}
+
+.home__install-table tr:last-child td {
+  border-bottom: none;
+}
+
+.home__install-table td code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--accent);
+}
+
+/* Install code blocks */
+.home__install-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 0.4rem;
+}
+
+.home__install-format-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin: 1.4rem 0 0.35rem;
+  padding: 0;
+}
+
+.home__install-blocks > .home__install-format-label:first-child {
+  margin-top: 0;
+}
+
+.home__install-maven-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.home__install-maven-link:hover {
+  text-decoration: underline;
+}
+
 /* Quick Links (Security) */
 .home__quick-links {
   display: flex;

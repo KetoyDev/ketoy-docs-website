@@ -25,6 +25,16 @@ export default function Footer() {
             >
               Releases
             </a>
+            <span className="footer__sep">|</span>
+            <Link to="/security">Security</Link>
+            <span className="footer__sep">|</span>
+            <a
+              href="https://central.sonatype.com/artifact/dev.ketoy/sdk"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Maven Central
+            </a>
           </div>
 
           <div className="footer__social">
@@ -66,13 +76,13 @@ export default function Footer() {
             </span>
           </div>
           <div className="footer__credit">
-            Website built with <FaHeart className="footer__heart" /> by{' '}
+            Website designed & built with <FaHeart className="footer__heart" /> by{' '}
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">
               Claude
             </a>{' '}
             and{' '}
-            <a href="https://github.com/features/copilot" target="_blank" rel="noopener noreferrer">
-              Copilot
+            <a href="https://github.com/developerchunk" target="_blank" rel="noopener noreferrer">
+              Developer Chunk
             </a>
           </div>
         </div>

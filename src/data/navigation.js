@@ -773,6 +773,18 @@ const navigation = [
       },
     ],
   },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'header',
+    label: 'More',
+  },
+  {
+    type: 'link',
+    label: 'Security',
+    path: '/security',
+  },
 ]
 
 export default navigation

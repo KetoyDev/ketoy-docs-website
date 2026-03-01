@@ -11,6 +11,65 @@ const initializationDoc = {
   order: 1,
   sections: [
     {
+      id: 'installation',
+      title: 'Installation',
+      content: `Add the Ketoy SDK to your Android project. Always use the **latest version** — check [Maven Central](https://central.sonatype.com/artifact/dev.ketoy/sdk) for the most recent release.
+
+The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
+
+| Build System | Config File | Latest Version |
+|---|---|---|
+| Kotlin DSL | \`build.gradle.kts\` | \`0.1-beta\` |
+| Groovy DSL | \`build.gradle\` | \`0.1-beta\` |
+| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1-beta\` |`,
+      subsections: [
+        {
+          id: 'install-kotlin-dsl',
+          title: 'Kotlin DSL',
+          content: 'Add the dependency in your module-level `build.gradle.kts`:',
+          code: `dependencies {
+    implementation("dev.ketoy:sdk:0.1-beta")
+}`,
+          language: 'kotlin',
+          codeTitle: 'build.gradle.kts',
+        },
+        {
+          id: 'install-groovy',
+          title: 'Groovy DSL',
+          content: 'Add the dependency in your module-level `build.gradle`:',
+          code: `dependencies {
+    implementation 'dev.ketoy:sdk:0.1-beta'
+}`,
+          language: 'groovy',
+          codeTitle: 'build.gradle',
+        },
+        {
+          id: 'install-toml',
+          title: 'Version Catalog (TOML)',
+          content: 'If you use a Gradle version catalog, declare the version and library in `libs.versions.toml`:',
+          code: `[versions]
+ketoy = "0.1-beta"
+
+[libraries]
+ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`,
+          language: 'toml',
+          codeTitle: 'libs.versions.toml',
+          subsections: [
+            {
+              id: 'install-toml-usage',
+              title: 'Then reference it in your build file',
+              content: 'Reference the catalog alias in your module-level `build.gradle.kts`:',
+              code: `dependencies {
+    implementation(libs.ketoy.sdk)
+}`,
+              language: 'kotlin',
+              codeTitle: 'build.gradle.kts',
+            },
+          ],
+        },
+      ],
+    },
+    {
       id: 'overview',
       title: 'Overview',
       content: `Ketoy is initialized via a single call to \`Ketoy.initialize()\`. This must be invoked **before** rendering any server-driven UI — typically inside your \`Application.onCreate()\` or root composable.
