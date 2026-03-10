@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { getAllClasses, getClassesByCategory } from '../data/reference'
 import { getGuideDocs } from '../data/docs'
 import CodeBlock from '../components/CodeBlock'
+import useSEO from '../hooks/useSEO'
 import './Home.css'
 
 const fadeUp = {
@@ -15,6 +16,11 @@ const fadeUp = {
 }
 
 export default function Home() {
+  useSEO({
+    title: 'Ketoy Docs — Server-Driven UI Framework for Android',
+    description: 'Official documentation for Ketoy — an open-source Server-Driven UI (SDUI) framework for Jetpack Compose. Guides, API reference, and examples.',
+    path: '/',
+  })
   const allClasses = getAllClasses()
   const byCategory = getClassesByCategory()
   const guideDocs = getGuideDocs().slice(0, 5)

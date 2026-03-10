@@ -1,7 +1,13 @@
 import { motion } from 'framer-motion'
+import useSEO from '../hooks/useSEO'
 import './Security.css'
 
 export default function Security() {
+  useSEO({
+    title: 'Security — Ketoy Docs',
+    description: 'Security practices, artifact verification, and vulnerability reporting for the Ketoy SDK.',
+    path: '/security',
+  })
   return (
     <div className="sec">
       {/* ── Hero ── */}

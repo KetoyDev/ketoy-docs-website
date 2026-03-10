@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Highlight, themes } from 'prism-react-renderer'
 import { useTheme } from '../context/ThemeContext'
 import { getClassById, getAllClasses } from '../data/reference'
+import useSEO from '../hooks/useSEO'
 import './ReferencePage.css'
 
 /** Set of all known reference class names for cross-linking */
@@ -80,6 +81,12 @@ export default function ReferencePage() {
   const { theme } = useTheme()
 
   const cls = getClassById(classId)
+
+  useSEO({
+    title: cls ? `${cls.name} — Ketoy API Reference` : 'Class Not Found — Ketoy Docs',
+    description: cls ? `API reference for ${cls.name} (${cls.kind}) in the Ketoy SDK. ${cls.category} / ${cls.subcategory}.` : undefined,
+    path: `/reference/${classId}`,
+  })
 
   if (!cls) {
     return (

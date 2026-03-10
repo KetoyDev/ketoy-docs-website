@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { getAllClasses, getClassesByCategory } from '../data/reference'
+import useSEO from '../hooks/useSEO'
 import './ReferenceIndex.css'
 
 function AnnotationBadge({ name }) {
@@ -19,6 +20,11 @@ function AnnotationBadge({ name }) {
 }
 
 export default function ReferenceIndex() {
+  useSEO({
+    title: 'API Reference — Ketoy SDK',
+    description: `Browse all ${getAllClasses().length} classes in the Ketoy SDK API reference. Server-Driven UI framework for Android Jetpack Compose.`,
+    path: '/reference',
+  })
   const allClasses = getAllClasses()
   const byCategory = getClassesByCategory()
 

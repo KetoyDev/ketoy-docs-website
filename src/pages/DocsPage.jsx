@@ -5,6 +5,7 @@ import { FaRocket, FaThLarge, FaPuzzlePiece, FaMobileAlt, FaCompass, FaBolt, FaW
 import CodeBlock from '../components/CodeBlock'
 import { getDocById, getAllDocs } from '../data/docs'
 import { getClassById } from '../data/reference'
+import useSEO from '../hooks/useSEO'
 import './DocsPage.css'
 
 /** Map icon string names from doc data to react-icons components */
@@ -183,6 +184,12 @@ export default function DocsPage() {
   const { docId } = useParams()
   const doc = getDocById(docId)
   const [activeId, setActiveId] = useState(null)
+
+  useSEO({
+    title: doc ? `${doc.title} — Ketoy Docs` : 'Page Not Found — Ketoy Docs',
+    description: doc ? `Learn about ${doc.title} in the Ketoy Server-Driven UI framework for Android Jetpack Compose.` : undefined,
+    path: `/docs/${docId}`,
+  })
 
   // Collect TOC — must be before any early return (Rules of Hooks)
   const toc = doc ? doc.sections.map(s => ({ id: s.id, title: s.title })) : []

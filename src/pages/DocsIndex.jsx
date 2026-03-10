@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaRocket, FaThLarge, FaPuzzlePiece, FaMobileAlt, FaCompass, FaBolt, FaWrench, FaCogs, FaFlask, FaBoxOpen, FaFont, FaImage, FaKeyboard, FaListUl } from 'react-icons/fa'
 import { getGuideDocs, getWidgetDocs } from '../data/docs'
+import useSEO from '../hooks/useSEO'
 import './DocsIndex.css'
 
 /** Map icon string names from doc data to react-icons components */
@@ -37,6 +38,11 @@ const fadeUp = {
 }
 
 export default function DocsIndex() {
+  useSEO({
+    title: 'Documentation — Ketoy Server-Driven UI SDK',
+    description: 'Browse all Ketoy guides and component documentation. Learn how to build server-driven UIs with Jetpack Compose.',
+    path: '/docs',
+  })
   const allDocs = getGuideDocs()
   const widgetDocs = getWidgetDocs()
 
