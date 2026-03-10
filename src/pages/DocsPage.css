@@ -137,6 +137,14 @@
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
+.docs-toc__link--active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-weight: 600;
+  border-left: 2px solid var(--accent);
+  padding-left: calc(0.5rem - 2px);
+}
+
 /* ── Content ── */
 .docs-content {
   margin-bottom: 2.5rem;

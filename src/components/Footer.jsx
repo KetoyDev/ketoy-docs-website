@@ -57,7 +57,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Apache 2.0 License
+             Apache License 2.0
           </a>
           .
         </div>

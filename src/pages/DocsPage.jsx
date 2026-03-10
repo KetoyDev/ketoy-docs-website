@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FaRocket, FaThLarge, FaPuzzlePiece, FaMobileAlt, FaCompass, FaBolt, FaWrench, FaCogs, FaFlask, FaBoxOpen, FaFont, FaImage, FaKeyboard, FaListUl } from 'react-icons/fa'
 import CodeBlock from '../components/CodeBlock'
@@ -181,6 +182,37 @@ function DocSection({ section, depth = 2 }) {
 export default function DocsPage() {
   const { docId } = useParams()
   const doc = getDocById(docId)
+  const [activeId, setActiveId] = useState(null)
+
+  // Collect TOC — must be before any early return (Rules of Hooks)
+  const toc = doc ? doc.sections.map(s => ({ id: s.id, title: s.title })) : []
+
+  useEffect(() => {
+    if (!doc || toc.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible entry
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length > 0) {
+          setActiveId(visible[0].target.id)
+        }
+      },
+      {
+        rootMargin: '-80px 0px -60% 0px',
+        threshold: 0,
+      }
+    )
+
+    toc.forEach(({ id }) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [docId, toc.length])
 
   if (!doc) {
     return (
@@ -192,15 +224,11 @@ export default function DocsPage() {
     )
   }
 
-  // Determine if this is a widget doc (order >= 3) or a guide doc
-  const isWidgetDoc = doc.order >= 3
+  // Determine sibling docs for prev/next navigation
   const siblingDocs = getAllDocs()
   const currentIdx = siblingDocs.findIndex(d => d.id === docId)
   const prevDoc = currentIdx > 0 ? siblingDocs[currentIdx - 1] : null
   const nextDoc = currentIdx < siblingDocs.length - 1 ? siblingDocs[currentIdx + 1] : null
-
-  // Collect TOC from sections
-  const toc = doc.sections.map(s => ({ id: s.id, title: s.title }))
 
   return (
     <motion.div
@@ -272,8 +300,8 @@ export default function DocsPage() {
           </div>
         </div>
 
-                {/* On This Page – sticky right sidebar (guide pages only) */}
-                {!isWidgetDoc && toc.length > 2 && (
+                {/* On This Page – sticky right sidebar (all docs pages) */}
+                {toc.length > 1 && (
                   <aside className="docs-page__toc">
                     <nav className="docs-toc">
                       <h4 className="docs-toc__title">On this page</h4>
@@ -282,10 +310,11 @@ export default function DocsPage() {
                           <li key={item.id}>
                             <a
                               href={`#${item.id}`}
-                              className="docs-toc__link"
+                              className={`docs-toc__link${activeId === item.id ? ' docs-toc__link--active' : ''}`}
                               onClick={(e) => {
                                 e.preventDefault()
                                 document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' })
+                                setActiveId(item.id)
                               }}
                             >
                               {item.title}

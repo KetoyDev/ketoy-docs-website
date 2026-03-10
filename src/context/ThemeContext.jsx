@@ -2,15 +2,15 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 const ThemeContext = createContext()
 
-export const DEFAULT_ACCENT = '#6C5CE7'
+export const DEFAULT_ACCENT = '#2563eb'
 export const DEFAULT_PATTERN = 'arches'
 export const DEFAULT_PATTERN_OPACITY = 0.18
 export const MAX_PATTERN_OPACITY = 0.6
 
 export const COLOR_PRESETS = [
-  '#6C5CE7', '#a78bfa', '#3B82F6', '#06B6D4',
-  '#10B981', '#22C55E', '#F59E0B', '#F97316',
-  '#EF4444', '#EC4899', '#8B5CF6', '#6366F1',
+  '#2563eb', '#3b82f6', '#6366f1', '#8b5cf6',
+  '#a78bfa', '#06B6D4', '#10B981', '#22C55E',
+  '#F59E0B', '#F97316', '#EF4444', '#EC4899',
 ]
 
 const STORAGE_KEY = 'ketoy-docs-customization'
@@ -43,26 +43,25 @@ function applyAccentCSS(hex, themeMode) {
   const { r, g, b } = hexToRgb(hex)
 
   if (themeMode === 'dark') {
-    const lightVariant = lighten(hex, 0.35)
-    const { r: lr, g: lg, b: lb } = hexToRgb(lightVariant)
-    root.style.setProperty('--accent', lightVariant)
-    root.style.setProperty('--accent-light', `rgba(${lr}, ${lg}, ${lb}, 0.15)`)
-    root.style.setProperty('--accent-dark', lighten(hex, 0.5))
-    root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${lightVariant}, ${lighten(hex, 0.5)})`)
+    const lightVariant = lighten(hex, 0.25)
+    root.style.setProperty('--accent', hex)
+    root.style.setProperty('--accent-light', `rgba(${r}, ${g}, ${b}, 0.12)`)
+    root.style.setProperty('--accent-dark', darken(hex, 0.15))
+    root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${hex}, ${lightVariant})`)
     root.style.setProperty('--text-link', lightVariant)
-    root.style.setProperty('--text-link-hover', lighten(hex, 0.5))
-    root.style.setProperty('--bg-hover', `rgba(${lr}, ${lg}, ${lb}, 0.08)`)
-    root.style.setProperty('--bg-active', `rgba(${lr}, ${lg}, ${lb}, 0.12)`)
-    root.style.setProperty('--bg-badge', `rgba(${lr}, ${lg}, ${lb}, 0.15)`)
+    root.style.setProperty('--text-link-hover', lighten(hex, 0.4))
+    root.style.setProperty('--bg-hover', `rgba(${r}, ${g}, ${b}, 0.10)`)
+    root.style.setProperty('--bg-active', `rgba(${r}, ${g}, ${b}, 0.15)`)
+    root.style.setProperty('--bg-badge', `rgba(${r}, ${g}, ${b}, 0.12)`)
   } else {
     root.style.setProperty('--accent', hex)
     root.style.setProperty('--accent-light', `rgba(${r}, ${g}, ${b}, 0.08)`)
     root.style.setProperty('--accent-dark', darken(hex, 0.15))
-    root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${hex}, ${lighten(hex, 0.3)})`)
+    root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${hex}, ${lighten(hex, 0.2)})`)
     root.style.setProperty('--text-link', hex)
-    root.style.setProperty('--text-link-hover', darken(hex, 0.15))
-    root.style.setProperty('--bg-hover', `rgba(${r}, ${g}, ${b}, 0.06)`)
-    root.style.setProperty('--bg-active', `rgba(${r}, ${g}, ${b}, 0.1)`)
+    root.style.setProperty('--text-link-hover', darken(hex, 0.12))
+    root.style.setProperty('--bg-hover', `rgba(${r}, ${g}, ${b}, 0.07)`)
+    root.style.setProperty('--bg-active', `rgba(${r}, ${g}, ${b}, 0.12)`)
     root.style.setProperty('--bg-badge', `rgba(${r}, ${g}, ${b}, 0.08)`)
   }
 }
@@ -86,8 +85,10 @@ export function ThemeProvider({ children }) {
   const saved = loadSaved()
 
   const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('ketoy-docs-theme')
-    if (savedTheme) return savedTheme
+    try {
+      const t = localStorage.getItem('ketoy-docs-theme')
+      if (t === 'light' || t === 'dark') return t
+    } catch {}
     return 'dark'
   })
 
@@ -126,7 +127,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('ketoy-docs-theme', theme)
+    try { localStorage.setItem('ketoy-docs-theme', theme) } catch {}
   }, [theme])
 
   useEffect(() => {
@@ -137,7 +138,7 @@ export function ThemeProvider({ children }) {
     }
   }, [accentColor, theme])
 
-  const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'))
+  const toggle = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))
 
   return (
     <ThemeContext.Provider value={{

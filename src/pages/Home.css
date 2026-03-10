@@ -80,35 +80,26 @@
   margin: 2rem 0;
 }
 
-.home__info-card {
-  padding: 1.5rem;
+.home__info-item {
+  padding: 1.25rem 1.5rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-secondary);
   background: var(--bg-card);
-  transition: all var(--transition);
 }
 
-.home__info-card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-}
-
-.home__info-icon {
-  font-size: 1.5rem;
-  display: block;
-  margin-bottom: 0.6rem;
-}
-
-.home__info-card h3 {
-  font-size: 1rem;
-  margin: 0 0 0.4rem;
+.home__info-item h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.35rem;
   border: none;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
-.home__info-card p {
-  font-size: 0.87rem;
+.home__info-item p {
+  font-size: 0.85rem;
   margin: 0;
   color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 /* Platforms */
@@ -147,7 +138,7 @@
   font-size: 0.8rem;
 }
 
-/* Gallery */
+/* Quick Reference List */
 .home__gallery {
   margin: 2.5rem 0;
 }
@@ -157,73 +148,46 @@
 }
 
 .home__gallery-sub {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
-.home__gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.home__gallery-card {
-  display: block;
-  border-radius: var(--radius-lg);
+.home__ref-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   border: 1px solid var(--border-secondary);
-  background: var(--bg-card);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  text-decoration: none;
-  transition: all var(--transition);
+  margin-bottom: 1rem;
 }
 
-.home__gallery-card:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.home__gallery-img-wrapper {
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--bg-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home__gallery-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.home__gallery-placeholder {
-  aspect-ratio: 4 / 3;
-  background: var(--accent-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home__gallery-placeholder span {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
-  opacity: 0.5;
-}
-
-.home__gallery-card-body {
-  padding: 0.75rem 1rem;
+.home__ref-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-secondary);
+  background: var(--bg-card);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  font-size: 0.9rem;
 }
 
-.home__gallery-card-body h4 {
-  font-size: 0.9rem;
-  margin: 0;
-  color: var(--text-primary);
+.home__ref-item:last-child {
+  border-bottom: none;
+}
+
+.home__ref-item:hover {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+
+.home__ref-name {
+  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
 }
 
 /* Install */
@@ -406,6 +370,5 @@
   .home__subtitle { font-size: 1rem; }
   .home__info { grid-template-columns: 1fr; }
   .home__install-tabs { grid-template-columns: 1fr; }
-  .home__gallery-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .home__quick-links { max-width: 100%; }
 }

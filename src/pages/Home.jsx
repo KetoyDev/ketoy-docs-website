@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FaCloud, FaCubes, FaBolt } from 'react-icons/fa'
 import { getAllClasses, getClassesByCategory } from '../data/reference'
+import { getGuideDocs } from '../data/docs'
 import CodeBlock from '../components/CodeBlock'
 import './Home.css'
 
@@ -17,6 +17,7 @@ const fadeUp = {
 export default function Home() {
   const allClasses = getAllClasses()
   const byCategory = getClassesByCategory()
+  const guideDocs = getGuideDocs().slice(0, 5)
 
   return (
     <div className="home">
@@ -28,7 +29,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
         >
           <span className="badge" style={{ marginBottom: '0.75rem', display: 'inline-flex' }}>
-            Open Source · Apache 2.0
+            Open Source · Apache License 2.0
           </span>
           <h1 className="home__title">
             Ketoy <span className="home__title-accent">Docs</span>
@@ -56,37 +57,17 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Info cards */}
+      {/* Info chips */}
       <section className="home__info">
         {[
-          {
-            icon: <FaCloud />,
-            title: 'Cloud-Driven Screens',
-            desc: 'Fetch UI layouts from the Ketoy Cloud API with built-in caching, versioning, and background refresh.',
-          },
-          {
-            icon: <FaCubes />,
-            title: 'Component Registry',
-            desc: 'Register custom @Composable components with @KComponent and render them dynamically from JSON.',
-          },
-          {
-            icon: <FaBolt />,
-            title: 'Smart Caching',
-            desc: 'Five caching strategies (Network-First, Cache-First, Optimistic, Cache-Only, Network-Only) for every use case.',
-          },
-        ].map((card, i) => (
-          <motion.div
-            key={card.title}
-            className="home__info-card"
-            custom={i}
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-          >
-            <span className="home__info-icon">{card.icon}</span>
-            <h3>{card.title}</h3>
-            <p>{card.desc}</p>
-          </motion.div>
+          { label: 'Cloud-Driven Screens', desc: 'Fetch UI layouts from Ketoy Cloud with built-in caching & versioning.' },
+          { label: 'Component Registry', desc: 'Register @Composable components with @KComponent and render from JSON.' },
+          { label: 'Smart Caching', desc: '5 caching strategies: Network-First, Cache-First, Optimistic, and more.' },
+        ].map((item) => (
+          <div key={item.label} className="home__info-item">
+            <h3>{item.label}</h3>
+            <p>{item.desc}</p>
+          </div>
         ))}
       </section>
 
@@ -199,37 +180,30 @@ ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`}
       <section className="home__gallery">
         <h2>Quick Reference</h2>
         <p className="home__gallery-sub">
-          Browse the complete API reference for the Ketoy SDK.
+          Jump to the most commonly used guides.
         </p>
-        <div className="home__gallery-grid">
-          {allClasses.slice(0, 12).map((cls, i) => (
+        <div className="home__ref-list">
+          {guideDocs.map((doc, i) => (
             <motion.div
-              key={cls.name}
+              key={doc.id}
               custom={i}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-40px' }}
               variants={fadeUp}
             >
-              <Link to={`/reference/${cls.name}`} className="home__gallery-card">
-                <div className="home__gallery-placeholder">
-                  <span>{cls.name[0]}</span>
-                </div>
-                <div className="home__gallery-card-body">
-                  <h4>{cls.name}</h4>
-                  <span className="badge badge--outline">{cls.kind}</span>
-                </div>
+              <Link to={`/docs/${doc.id}`} className="home__ref-item">
+                <span className="home__ref-name">{doc.title}</span>
+                <span className="badge badge--outline">{doc.sections.length} sections</span>
               </Link>
             </motion.div>
           ))}
         </div>
-        {allClasses.length > 12 && (
-          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-            <Link to="/reference" className="home__btn home__btn--secondary">
-              View All {allClasses.length} Entries →
-            </Link>
-          </div>
-        )}
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <Link to="/docs" className="home__btn home__btn--secondary">
+            View All Guides →
+          </Link>
+        </div>
       </section>
     </div>
   )
