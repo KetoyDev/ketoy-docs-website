@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+Sitemap: https://ketoy.dev/sitemap.xml
 Sitemap: https://docs.ketoy.dev/sitemap.xml

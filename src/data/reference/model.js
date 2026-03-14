@@ -397,8 +397,8 @@ data class KModifier(
     val scale: Float? = null,
     val rotation: Float? = null,
     val alpha: Float? = null,
-    val verticalScroll: Boolean? = null,
-    val horizontalScroll: Boolean? = null
+    val verticalScroll: KScrollConfig? = null,
+    val horizontalScroll: KScrollConfig? = null
 )`,
     },
     properties: [
@@ -421,8 +421,8 @@ data class KModifier(
       { name: 'scale', type: 'Float?', default: 'null', description: 'Scale transform (1.0 = 100%).' },
       { name: 'rotation', type: 'Float?', default: 'null', description: 'Rotation in degrees.' },
       { name: 'alpha', type: 'Float?', default: 'null', description: 'Opacity (0.0 = transparent, 1.0 = opaque).' },
-      { name: 'verticalScroll', type: 'Boolean?', default: 'null', description: 'Enable vertical scrolling on the element.' },
-      { name: 'horizontalScroll', type: 'Boolean?', default: 'null', description: 'Enable horizontal scrolling on the element.' },
+      { name: 'verticalScroll', type: 'KScrollConfig?', default: 'null', description: 'Vertical scroll configuration. Supports boolean shorthand in JSON (`true`/`false`) or full object config.' },
+      { name: 'horizontalScroll', type: 'KScrollConfig?', default: 'null', description: 'Horizontal scroll configuration. Supports boolean shorthand in JSON (`true`/`false`) or full object config.' },
     ],
     usage: `// JSON
 {
@@ -444,7 +444,101 @@ kModifier(
     shadow = kShadow(elevation = 4)
 )`,
     notes: 'All properties are nullable — only set properties are serialized to JSON. The renderer applies modifier chains in a specific order: size → margin → background/gradient → border → shape → shadow → padding → scroll → transforms → clickable.',
-    seeAlso: ['KPadding', 'KMargin', 'KBorder', 'KShadow', 'KGradient', 'kModifier', 'kPadding', 'kMargin', 'kBorder', 'kShadow'],
+    seeAlso: ['KPadding', 'KMargin', 'KBorder', 'KShadow', 'KGradient', 'KScrollConfig', 'kModifier', 'kPadding', 'kMargin', 'kBorder', 'kShadow', 'kScrollConfig'],
+  },
+
+  KScrollConfig: {
+    name: 'KScrollConfig',
+    kind: 'data class',
+    module: 'model',
+    subpackage: 'modifier',
+    category: 'Model',
+    subcategory: 'Modifier',
+    description: 'Configuration for scroll behavior on a single axis (vertical or horizontal). Supports fine-grained control over enabled state, direction, and fling behavior. Compatible with boolean shorthand JSON for backward compatibility.',
+    android: {
+      packageName: 'com.developerstring.ketoy.model',
+      annotations: ['@Serializable(with = KScrollConfigSerializer::class)'],
+      imports: [
+        'import kotlinx.serialization.*',
+      ],
+      sourceCode: `@Serializable(with = KScrollConfigSerializer::class)
+data class KScrollConfig(
+    val enabled: Boolean = true,
+    val reverseScrolling: Boolean = false,
+    val flingBehavior: String? = null
+) {
+    companion object {
+        val Default = KScrollConfig(enabled = true)
+        val Disabled = KScrollConfig(enabled = false)
+
+        const val FLING_DEFAULT = "default"
+        const val FLING_NONE = "none"
+    }
+}`,
+    },
+    properties: [
+      { name: 'enabled', type: 'Boolean', default: 'true', description: 'Whether scrolling is enabled.' },
+      { name: 'reverseScrolling', type: 'Boolean', default: 'false', description: 'When true, reverses the scroll direction.' },
+      { name: 'flingBehavior', type: 'String?', default: 'null', description: 'Fling behavior preset: null or "default" for standard fling, "none" to disable fling and stop immediately.' },
+    ],
+    usage: `// Kotlin DSL
+KModifier(
+    fillMaxSize = 1f,
+    verticalScroll = kScrollConfig(
+        enabled = true,
+        reverseScrolling = false,
+        flingBehavior = "none"
+    )
+)
+
+// JSON boolean shorthand (backward compatible)
+{
+    "verticalScroll": true
+}
+
+// JSON full object
+{
+    "verticalScroll": {
+        "enabled": true,
+        "reverseScrolling": true,
+        "flingBehavior": "none"
+    }
+}`,
+    notes: 'KScrollConfigSerializer supports both boolean shorthand and full object format for deserialization. Serialization always uses full object format for consistency.',
+    seeAlso: ['KModifier', 'KScrollConfigSerializer', 'kScrollConfig'],
+  },
+
+  KScrollConfigSerializer: {
+    name: 'KScrollConfigSerializer',
+    kind: 'object',
+    module: 'model',
+    subpackage: 'serializer',
+    category: 'Model',
+    subcategory: 'Serializer',
+    description: 'Custom serializer for KScrollConfig that handles both boolean shorthand and full object format.',
+    android: {
+      packageName: 'com.developerstring.ketoy.model',
+      annotations: [],
+      imports: [
+        'import kotlinx.serialization.KSerializer',
+        'import kotlinx.serialization.json.*',
+      ],
+      sourceCode: `object KScrollConfigSerializer : KSerializer<KScrollConfig> {
+    // Deserialization:
+    // true  -> KScrollConfig(enabled = true)
+    // false -> KScrollConfig(enabled = false)
+    // { enabled, reverseScrolling, flingBehavior } -> full object
+
+    // Serialization:
+    // Always outputs full object format
+}`,
+    },
+    usage: `// Accepted JSON inputs:
+{ "verticalScroll": true }
+{ "verticalScroll": false }
+{ "verticalScroll": { "enabled": true, "reverseScrolling": false, "flingBehavior": "none" } }`,
+    notes: 'Used automatically by KScrollConfig via @Serializable(with = KScrollConfigSerializer::class). You typically do not use this serializer directly.',
+    seeAlso: ['KScrollConfig', 'KModifier'],
   },
 
   KPadding: {

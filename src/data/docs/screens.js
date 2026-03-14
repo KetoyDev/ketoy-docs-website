@@ -197,6 +197,126 @@ fun HomeScreen(
       language: 'kotlin',
     },
 
+    // ── Data-driven KetoyContent ──
+    {
+      id: 'data-driven-content',
+      title: 'Data-Driven KetoyContent',
+      content: `Pass runtime data to your DSL content via the \`data\` parameter. Values in this map replace \`{{data:user:key}}\` template placeholders in your exported JSON:`,
+      code: `KetoyContent(
+    name = "cards",
+    data = mapOf(
+        "name" to userName,
+        "totalBalance" to totalBalance,
+        "income" to income,
+        "notificationCount" to notificationCount.toString(),
+    ),
+    nodeBuilder = {
+        buildHomeCards(
+            userName = KData.user("name"),
+            totalBalance = KData.user("totalBalance"),
+            income = KData.user("income"),
+            notificationCount = KData.user("notificationCount"),
+        )
+    }
+)`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'kdata-helpers',
+          title: 'KData Template Helpers',
+          content: `Use \`KData\` helpers to generate template placeholders in your DSL builders:`,
+          code: `// In your build function:
+fun buildHomeCards(
+    userName: String,    // Receives "{{data:user:name}}" at export time
+    totalBalance: String // Receives "{{data:user:totalBalance}}" at export time
+) = KColumn {
+    KText(text = userName)
+    KText(text = totalBalance)
+}
+
+// Export definition uses KData:
+val homeExport = ketoyExport("home") {
+    content("cards") {
+        buildHomeCards(
+            userName = KData.user("name"),        // → "{{data:user:name}}"
+            totalBalance = KData.user("totalBalance")
+        )
+    }
+}`,
+          language: 'kotlin',
+        },
+      ],
+    },
+
+    // ── Declaring Exports (ketoyExport DSL) ──
+    {
+      id: 'declaring-exports',
+      title: 'Declaring Exports (ketoyExport DSL)',
+      content: `The recommended pattern is to define exports **alongside your screen composable** using the \`ketoyExport()\` DSL. This becomes the **single source of truth** for JSON export:`,
+      code: `// HomeScreen.kt
+import com.developerstring.ketoy.export.ketoyExport
+import com.developerstring.ketoy.util.KData
+
+// ── Export definition (top of file) ──────────────────────
+val homeExport = ketoyExport(
+    screenName = "home",
+    displayName = "Home",
+    description = "Main dashboard with balance and transactions",
+    version = "1.0.0"
+) {
+    content("cards") {
+        buildHomeCards(
+            userName = KData.user("name"),
+            totalBalance = KData.user("totalBalance"),
+            income = KData.user("income"),
+            notificationCount = KData.user("notificationCount"),
+        )
+    }
+    content("transactions") {
+        buildHomeTransactions()
+    }
+}
+
+// ── Screen composable ────────────────────────────────────
+@Composable
+fun HomeScreen(
+    userName: String,
+    totalBalance: String,
+    /* ... */
+) {
+    ProvideKetoyScreen(screenName = "home") {
+        Column {
+            KetoyContent(
+                name = "cards",
+                data = mapOf(
+                    "name" to userName,
+                    "totalBalance" to totalBalance,
+                    /* ... */
+                )
+            ) {
+                // Fallback UI rendered until JSON loads
+                CircularProgressIndicator()
+            }
+            // ... more content
+        }
+    }
+}`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'export-benefits',
+          title: 'Benefits of Co-located Exports',
+          content: `**Single source of truth** — The export definition and screen code live together. No separate test file to keep in sync.
+
+**Template variables** — Use \`KData.user("key")\` instead of hardcoded test values. The SDK resolves these at runtime.
+
+**Auto-registration** — The \`ketoyExport(...)\` call self-registers with \`KetoyExportRegistry\`. Just reference the export val in \`AppExports\` to trigger class-loading.
+
+**One test runs all** — \`KetoyAutoExportTest\` reads the registry and exports everything. No manual screen listing required.`,
+        },
+      ],
+    },
+
     // ── Inline DSL ──
     {
       id: 'inline-dsl',
@@ -385,7 +505,11 @@ screen.setDevOverride(name = "cards", json = null)`,
     {
       id: 'best-practices',
       title: 'Best Practices',
-      content: `**Use meaningful screen names** — The \`screenName\` is the key for cloud, dev-server, and export. Use stable, descriptive names like \`"home"\`, \`"profile"\`, \`"checkout_review"\`.
+      content: `**Define exports alongside screens** — Place \`ketoyExport()\` at the top of each screen file. The export definition and screen code stay together as a single source of truth.
+
+**Use \`KData\` for dynamic values** — Instead of hardcoding values in exports, use \`KData.user("key")\` and pass data via \`KetoyContent(data = ...)\`.
+
+**Use meaningful screen names** — The \`screenName\` is the key for cloud, dev-server, and export. Use stable, descriptive names like \`"home"\`, \`"profile"\`, \`"checkout_review"\`.
 
 **Give each content block a name** — When using multiple \`KetoyContent\` blocks, always provide a \`name\` parameter (e.g. \`"cards"\`, \`"transactions"\`). The default \`"main"\` works for single-content screens.
 

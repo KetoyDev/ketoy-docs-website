@@ -126,17 +126,17 @@ export default function Home() {
               <tr>
                 <td>Kotlin DSL</td>
                 <td><code>build.gradle.kts</code></td>
-                <td><code>0.1-beta</code></td>
+                <td><code>0.1.1-beta</code></td>
               </tr>
               <tr>
                 <td>Groovy DSL</td>
                 <td><code>build.gradle</code></td>
-                <td><code>0.1-beta</code></td>
+                <td><code>0.1.1-beta</code></td>
               </tr>
               <tr>
                 <td>Version Catalog (TOML)</td>
                 <td><code>libs.versions.toml</code></td>
-                <td><code>0.1-beta</code></td>
+                <td><code>0.1.1-beta</code></td>
               </tr>
             </tbody>
           </table>
@@ -147,7 +147,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Kotlin DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation("dev.ketoy:sdk:0.1-beta")
+    implementation("dev.ketoy:sdk:0.1.1-beta")
 }`}
             language="kotlin"
             title="build.gradle.kts"
@@ -156,7 +156,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Groovy DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation 'dev.ketoy:sdk:0.1-beta'
+    implementation 'dev.ketoy:sdk:0.1.1-beta'
 }`}
             language="groovy"
             title="build.gradle"
@@ -165,7 +165,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Version Catalog (TOML)</h4>
           <CodeBlock
             code={`[versions]
-ketoy = "0.1-beta"
+ketoy = "0.1.1-beta"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`}

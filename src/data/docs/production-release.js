@@ -1,13 +1,13 @@
 /**
  * Ketoy Documentation – Production Release
- * Covers: KetoyProductionExport, ProductionExportTest, manifests,
+ * Covers: ketoyExport DSL, KetoyAutoExportRunner, manifests,
  *         cloud config, Gradle push/rollback/delete tasks
  */
 
 const productionReleaseDoc = {
   id: 'production-release',
   title: 'Production Release',
-  description: 'Export production-ready screen and navigation JSON bundles with KetoyProductionExport, generate manifests, configure cloud credentials, and deploy screens with versioned push, rollback, and lifecycle management via Gradle tasks.',
+  description: 'Export production-ready screen and navigation JSON bundles with ketoyExport DSL, generate manifests, configure cloud credentials, and deploy screens with versioned push, rollback, and lifecycle management via Gradle tasks.',
   icon: 'FaRocket',
   order: 6,
   sections: [
@@ -21,13 +21,14 @@ const productionReleaseDoc = {
 
 | | Dev Export | Production Export |
 |---|---|---|
-| **Class** | \`ExportScreensTest\` / \`KetoyDevExporter\` | \`KetoyProductionExport\` |
+| **DSL** | \`ketoyExport()\` | \`ketoyExport()\` (same!) |
 | **Output dir** | \`ketoy-screens/\` | \`ketoy-export/\` |
 | **Gradle task** | \`ketoyExport\` | \`ketoyExportProd\` |
-| **Test data** | Hardcoded values ("Test User") | Template variables (\`{{data:user:name}}\`) |
-| **Nav graphs** | Via \`KetoyNavRegistry\` | Built-in \`registerNavGraphs()\` |
-| **Manifests** | None | \`navigation_manifest.json\` + \`screen_manifest.json\` |
+| **Test method** | \`exportForDevServer()\` | \`exportForProduction()\` |
+| **Manifests** | No | Yes (\`navigation_manifest.json\` + \`screen_manifest.json\`) |
 | **Purpose** | Live-reload during development | Ship to app assets / cloud |
+
+> **Note:** As of 0.1-beta.1, both dev and production exports use the same \`ketoyExport()\` DSL. No separate \`KetoyProductionExport\` class is needed.
 
 ### Gradle tasks at a glance
 
@@ -42,66 +43,38 @@ const productionReleaseDoc = {
 | \`ketoyDeleteScreen\` | \`./gradlew ketoyDeleteScreen -PscreenName=home\` | Delete all versions of a screen |`,
     },
 
-    // ── Step 1: Subclass KetoyProductionExport ──
+    // ── Step 1: Define Screen Exports ──
     {
-      id: 'production-export-class',
-      title: 'Step 1 — Subclass KetoyProductionExport',
-      content: `Create a concrete subclass that registers every screen and navigation graph you want to ship:`,
-      code: `class AppProductionExport : KetoyProductionExport() {
+      id: 'screen-exports',
+      title: 'Step 1 — Define Screen Exports (Same as Dev)',
+      content: `Production exports use the same \`ketoyExport()\` DSL as dev exports. Just add version and description metadata:`,
+      code: `// HomeScreen.kt
+import com.developerstring.ketoy.export.ketoyExport
+import com.developerstring.ketoy.util.KData
 
-    override fun registerScreens() {
-        // Multi-content screen (multiple KetoyContent blocks)
-        screen(
-            screenName = "home",
-            displayName = "Home Screen",
-            description = "Main landing screen with cards and transactions",
-            version = "1.0.0"
-        ) {
-            content("cards") {
-                buildHomeCards(
-                    userName = "{{data:user:name}}",
-                    totalBalance = "{{data:user:totalBalance}}",
-                    income = "{{data:user:monthlyIncome}}",
-                    notificationCount = 3,
-                    isDark = false
-                )
-            }
-            content("transactions") {
-                buildHomeTransactions(
-                    transactions = listOf(
-                        Triple("Salary", "Today", "+\\$4,200.00"),
-                    ),
-                    isDark = false
-                )
-            }
-        }
-
-        // Single-content screen
-        screen(
-            screenName = "profile",
-            displayName = "Profile Screen",
-            description = "User profile and settings",
-            version = "1.0.0"
-        ) {
-            content {   // default "main" content block
-                buildProfileScreen(
-                    userName = "{{data:user:name}}",
-                    isDark = false
-                )
-            }
-        }
+val homeExport = ketoyExport(
+    screenName = "home",
+    displayName = "Home Screen",
+    description = "Main landing screen with cards and transactions",
+    version = "1.0.0"
+) {
+    content("cards") {
+        buildHomeCards(
+            userName = KData.user("name"),
+            totalBalance = KData.user("totalBalance"),
+            income = KData.user("monthlyIncome"),
+            notificationCount = KData.user("notificationCount"),
+        )
     }
-
-    override fun registerNavGraphs() {
-        navGraph(AppNavGraphs.main)
-        navGraph(AppNavGraphs.demo)
+    content("transactions") {
+        buildHomeTransactions()
     }
 }`,
       language: 'kotlin',
       subsections: [
         {
-          id: 'screen-builder-api',
-          title: 'Screen Registration API',
+          id: 'screen-metadata',
+          title: 'Screen Metadata',
           table: {
             headers: ['Parameter', 'Type', 'Default', 'Description'],
             rows: [
@@ -113,144 +86,111 @@ const productionReleaseDoc = {
           },
         },
         {
-          id: 'content-builder',
-          title: 'Content Builder',
-          content: `Inside the \`screen { }\` lambda you get a \`ScreenBuilder\` scope. Call \`content()\` for each \`KetoyContent\` block the screen renders:`,
-          code: `screen("home", version = "1.2.0") {
-    // Named content block — matches KetoyContent(name = "cards")
-    content("cards") {
-        buildHomeCards(...)
-    }
-    // Default "main" content block
-    content {
-        buildMainContent(...)
-    }
-}`,
-          language: 'kotlin',
-        },
-        {
-          id: 'template-variables',
-          title: 'Template Variables',
-          content: `Use template variables (\`{{data:...}}\`) instead of hardcoded test data. At runtime, the app resolves these to live values:
-
-\`\`\`kotlin
-userName = "{{data:user:name}}"          // → "Jane Doe"
-totalBalance = "{{data:user:totalBalance}}"  // → "$12,450.00"
-\`\`\`
-
-The double-brace syntax is recognized by the Ketoy renderer. In production JSON, these remain as literal strings and are substituted at render time by your data bindings.`,
-        },
-      ],
-    },
-
-    // ── KetoyProductionExport API ──
-    {
-      id: 'production-export-api',
-      title: 'KetoyProductionExport API',
-      content: `Full reference for the abstract class and its output types:`,
-      subsections: [
-        {
-          id: 'base-class-api',
-          title: 'Abstract Class',
-          table: {
-            headers: ['Method', 'Returns', 'Description'],
-            rows: [
-              ['registerScreens()', 'Unit', 'Override — call screen() for each screen to export.'],
-              ['registerNavGraphs()', 'Unit', 'Override — call navGraph() for each navigation graph.'],
-              ['screen(name, displayName?, desc?, version?, builder)', 'Unit', 'Register a screen with content builders.'],
-              ['navGraph(graph: KetoyNavGraph)', 'Unit', 'Register a navigation graph for export.'],
-              ['buildExport()', 'ExportResult', 'Execute all builders, serialize, and return the result bundle.'],
-            ],
-          },
-        },
-        {
-          id: 'export-result-api',
-          title: 'ExportResult',
-          table: {
-            headers: ['Property / Method', 'Type', 'Description'],
-            rows: [
-              ['screens', 'List<ScreenExport>', 'All serialized screen exports.'],
-              ['navGraphs', 'List<NavGraphExport>', 'All serialized nav graph exports.'],
-              ['writeTo(directory, clearExisting?)', 'ExportSummary', 'Write all files to disk. clearExisting = true (default) deletes old files first.'],
-              ['buildNavigationManifest()', 'String', 'JSON index of all nav graphs (version, navHosts list, full graphs map).'],
-              ['buildScreenManifest(allScreenDefs)', 'String', 'JSON index of all screens (version, screen metadata array with names, versions, filenames).'],
-            ],
-          },
-        },
-        {
-          id: 'screen-export-type',
-          title: 'ScreenExport & NavGraphExport',
-          code: `// Individual screen export
-data class ScreenExport(
-    val screenName: String,
-    val fileName: String,      // "home.json"
-    val json: String           // Full serialized JSON
-)
-
-// Individual nav graph export
-data class NavGraphExport(
-    val navHostName: String,
-    val fileName: String,      // "nav_main.json"
-    val json: String,
-    val destinationCount: Int,
-    val navigationCount: Int
-)
-
-// Summary returned by writeTo()
-data class ExportSummary(
-    val screenCount: Int,
-    val navGraphCount: Int,
-    val totalBytes: Long,
-    val outputDirectory: File
-)`,
+          id: 'kdata-templates',
+          title: 'KData Template Variables',
+          content: `Use \`KData\` to insert template placeholders that resolve at runtime:`,
+          code: `userName = KData.user("name")          // → {{data:user:name}} → "Jane Doe"
+totalBalance = KData.user("totalBalance")  // → {{data:user:totalBalance}} → "$12,450.00"
+iconRef = KData.ref("settings_icon")       // → {{data:ref:settings_icon}}`,
           language: 'kotlin',
         },
       ],
     },
 
-    // ── Step 2: Write the Production Test ──
+    // ── Step 2: Register Nav Graph Exports ──
     {
-      id: 'production-test',
-      title: 'Step 2 — Write the Production Test',
-      content: `Create a JUnit test that runs the export and writes files + manifests to \`ketoy-export/\`:`,
-      code: `class ProductionExportTest {
+      id: 'nav-exports',
+      title: 'Step 2 — Register Nav Graph Exports',
+      content: `Register navigation graphs for export using \`ketoyNavExport()\`:`,
+      code: `// AppNavGraphs.kt (or a dedicated exports file)
+import com.developerstring.ketoy.export.ketoyNavExport
 
-    @Test
-    fun exportProduction() {
-        // 1. Build the export
-        val export = AppProductionExport()
-        val result = export.buildExport()
+val mainNavExport = ketoyNavExport(AppNavGraphs.main)
+val demoNavExport = ketoyNavExport(AppNavGraphs.demo)`,
+      language: 'kotlin',
+    },
 
-        // 2. Write all screen + nav JSON files to disk
-        val outputDir = File(System.getProperty("user.dir") ?: ".")
-            .resolve("../ketoy-export")
-        outputDir.mkdirs()
+    // ── Step 3: AppExports Manifest ──
+    {
+      id: 'app-exports',
+      title: 'Step 3 — Create AppExports Manifest',
+      content: `Reference all your export definitions in an \`AppExports\` object to trigger class-loading:`,
+      code: `// AppExports.kt
+object AppExports {
+    init {
+        // Screen exports
+        homeExport
+        profileExport
+        analyticsExport
+        cardsExport
+        historyExport
 
-        val summary = result.writeTo(outputDir)
-        println("✅ Exported \${summary.screenCount} screen(s) " +
-            "+ \${summary.navGraphCount} nav graph(s) " +
-            "(\${summary.totalBytes} bytes)")
-
-        // 3. Write navigation_manifest.json
-        val navManifest = result.buildNavigationManifest()
-        File(outputDir, "navigation_manifest.json").writeText(navManifest)
-        println("📋 Navigation manifest written")
-
-        // 4. Write screen_manifest.json
-        val screenDefs = export.getAllScreenDefinitions()
-        val screenManifest = result.buildScreenManifest(screenDefs)
-        File(outputDir, "screen_manifest.json").writeText(screenManifest)
-        println("📋 Screen manifest written")
+        // Nav graph exports
+        mainNavExport
+        demoNavExport
     }
+
+    fun ensureLoaded() { /* init block does the work */ }
 }`,
       language: 'kotlin',
     },
 
-    // ── Step 3: Run the Export ──
+    // ── Step 4: KetoyAutoExportTest ──
+    {
+      id: 'auto-export-test',
+      title: 'Step 4 — KetoyAutoExportTest Handles Both',
+      content: `A single test class handles both dev and production exports:`,
+      code: `class KetoyAutoExportTest {
+
+    private val runner = KetoyAutoExportRunner()
+
+    @Before
+    fun setUp() {
+        AppExports.ensureLoaded()
+    }
+
+    @Test
+    fun exportForDevServer() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-screens")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = false  // dev server doesn't need manifests
+        )
+        println(result)
+    }
+
+    @Test
+    fun exportForProduction() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-export")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = true  // production includes manifests
+        )
+        println(result)
+    }
+}`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'export-runner-api',
+          title: 'KetoyAutoExportRunner API',
+          table: {
+            headers: ['Parameter', 'Type', 'Default', 'Description'],
+            rows: [
+              ['outputDir', 'File', '(required)', 'Target directory for JSON files.'],
+              ['clearExisting', 'Boolean', 'true', 'Remove existing .json files before writing.'],
+              ['writeManifests', 'Boolean', 'true', 'Generate navigation_manifest.json and screen_manifest.json.'],
+            ],
+          },
+        },
+      ],
+    },
+
+    // ── Step 5: Run the Export ──
     {
       id: 'run-prod-export',
-      title: 'Step 3 — Run the Production Export',
-      content: `Use the \`ketoyExportProd\` Gradle task to run \`ProductionExportTest\`:`,
+      title: 'Step 5 — Run the Production Export',
+      content: `Use the \`ketoyExportProd\` Gradle task:`,
       code: `./gradlew ketoyExportProd`,
       language: 'bash',
       subsections: [
@@ -534,7 +474,9 @@ Use \`ketoyScreenVersions\` to audit all deployed versions, and \`ketoyRollback\
     {
       id: 'best-practices',
       title: 'Best Practices',
-      content: `**Use template variables in production** — Replace hardcoded test data with \`{{data:...}}\` placeholders. This keeps JSON screens data-agnostic and reusable.
+      content: `**Use \`KData\` template variables** — Use \`KData.user("key")\` instead of hardcoded values. This keeps JSON screens data-agnostic and reusable across environments.
+
+**Define exports alongside screens** — Place \`ketoyExport()\` at the top of each screen file. The export definition and screen code stay together as a single source of truth.
 
 **Run \`ketoyExportProd\` in CI** — Add the export task to your CI pipeline to catch serialization errors early.
 
@@ -544,7 +486,7 @@ Use \`ketoyScreenVersions\` to audit all deployed versions, and \`ketoyRollback\
 
 **Keep \`local.properties\` private** — Your API key lives there. Never commit it. Use CI secrets for automated push workflows.
 
-**Write manifests** — Always generate \`navigation_manifest.json\` and \`screen_manifest.json\`. They serve as the entry point for loading screens at runtime.
+**Keep \`AppExports\` up to date** — When adding a new screen, reference its export val in \`AppExports.init {}\`.
 
 **Bundle a fallback** — Ship a baseline set of screens in \`assets/\` so the app works offline, then layer cloud-fetched updates on top.`,
     },

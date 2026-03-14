@@ -19,16 +19,16 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
 
 | Build System | Config File | Latest Version |
 |---|---|---|
-| Kotlin DSL | \`build.gradle.kts\` | \`0.1-beta\` |
-| Groovy DSL | \`build.gradle\` | \`0.1-beta\` |
-| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1-beta\` |`,
+| Kotlin DSL | \`build.gradle.kts\` | \`0.1.1-beta\` |
+| Groovy DSL | \`build.gradle\` | \`0.1.1-beta\` |
+| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1.1-beta\` |`,
       subsections: [
         {
           id: 'install-kotlin-dsl',
           title: 'Kotlin DSL',
           content: 'Add the dependency in your module-level `build.gradle.kts`:',
           code: `dependencies {
-    implementation("dev.ketoy:sdk:0.1-beta")
+        implementation("dev.ketoy:sdk:0.1.1-beta")
 }`,
           language: 'kotlin',
           codeTitle: 'build.gradle.kts',
@@ -38,7 +38,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Groovy DSL',
           content: 'Add the dependency in your module-level `build.gradle`:',
           code: `dependencies {
-    implementation 'dev.ketoy:sdk:0.1-beta'
+        implementation 'dev.ketoy:sdk:0.1.1-beta'
 }`,
           language: 'groovy',
           codeTitle: 'build.gradle',
@@ -48,7 +48,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Version Catalog (TOML)',
           content: 'If you use a Gradle version catalog, declare the version and library in `libs.versions.toml`:',
           code: `[versions]
-ketoy = "0.1-beta"
+ketoy = "0.1.1-beta"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`,
@@ -79,7 +79,28 @@ The initializer sets up:
 - **Custom widget & action parsers** you provide
 - **Screens** (from JSON or builder functions)
 - **Cloud configuration** (optional) for fetching UI from the Ketoy backend
-- **Cache configuration** for controlling how fetched screens are stored`,
+- **Cache configuration** for controlling how fetched screens are stored
+- **Dev and export tooling** through the \`dev.ketoy.devtools\` Gradle plugin (optional for local preview/export tasks)`,
+    },
+  {
+    id: 'gradle-plugin',
+    title: 'Optional Gradle Plugin (Dev & Export Tasks)',
+    content: `If you use Ketoy's local preview/export workflow, apply the Ketoy Gradle plugin. It registers tasks like \`ketoyExport\`, \`ketoyExportProd\`, \`ketoyServe\`, and \`ketoyDev\`.
+
+This plugin is optional for runtime-only integration, but recommended for teams using screen export workflows.`,
+    code: `// settings.gradle.kts
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+  }
+}
+
+// root build.gradle.kts
+plugins {
+  id("dev.ketoy.devtools") version "0.1.1-beta"
+}`,
+      language: 'kotlin',
     },
     {
       id: 'basic-setup',

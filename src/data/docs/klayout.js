@@ -182,6 +182,79 @@ All three are available inside any \`KUniversalScope\` content lambda and accept
       language: 'kotlin',
     },
     {
+      id: 'scroll-config',
+      title: 'Scrollable Layouts (KScrollConfig)',
+      content: `Enable scrolling on \`KColumn\` or \`KRow\` using the \`verticalScroll\` or \`horizontalScroll\` modifier property. You can use a simple boolean or a \`KScrollConfig\` object for fine-grained control:`,
+      code: `// Simple boolean shorthand
+KColumn(
+    modifier = KModifier(fillMaxSize = 1f, verticalScroll = true)
+) {
+    // ... tall content that may overflow
+}
+
+// Full KScrollConfig for advanced control
+KColumn(
+    modifier = KModifier(
+        fillMaxSize = 1f,
+        verticalScroll = kScrollConfig(
+            enabled = true,
+            reverseScrolling = false,
+            flingBehavior = "none"  // Stops immediately when released
+        )
+    )
+) {
+    // ... content
+}`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'scroll-config-params',
+          title: 'KScrollConfig Properties',
+          table: {
+            headers: ['Property', 'Type', 'Default', 'Description'],
+            rows: [
+              ['enabled', 'Boolean', 'true', 'Whether scrolling is enabled.'],
+              ['reverseScrolling', 'Boolean', 'false', 'When true, reverses scroll direction (scroll down = content moves up).'],
+              ['flingBehavior', 'String?', 'null (default)', 'Fling physics preset: "default" (standard fling), "none" (stops immediately).'],
+            ],
+          },
+        },
+        {
+          id: 'scroll-json-format',
+          title: 'JSON Format',
+          content: `The modifier supports two JSON formats for scroll configuration:`,
+          code: `// Boolean shorthand
+{ "verticalScroll": true }
+
+// Full object format
+{
+  "verticalScroll": {
+    "enabled": true,
+    "reverseScrolling": true,
+    "flingBehavior": "none"
+  }
+}`,
+          language: 'json',
+        },
+        {
+          id: 'scroll-dsl-helper',
+          title: 'DSL Helper',
+          content: `Use the \`kScrollConfig()\` helper function in Kotlin DSL:`,
+          code: `import com.developerstring.ketoy.dsl.Helpers.kScrollConfig
+
+val scrollModifier = KModifier(
+    fillMaxSize = 1f,
+    verticalScroll = kScrollConfig(
+        enabled = true,
+        reverseScrolling = false,
+        flingBehavior = "none"
+    )
+)`,
+          language: 'kotlin',
+        },
+      ],
+    },
+    {
       id: 'arrangements',
       title: 'Arrangements & Alignment',
       content: `\`KArrangements\` and \`KAlignment\` control child positioning:`,

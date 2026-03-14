@@ -1,6 +1,6 @@
 /**
  * Ketoy Documentation – Testing Locally
- * Covers: ExportScreensTest, KetoyDevExporter, KetoyDevWrapper,
+ * Covers: ketoyExport DSL, KetoyAutoExportTest, KetoyDevWrapper,
  *         KetoyDevClient, KetoyDevServer, Gradle tasks, live-reload pipeline
  */
 
@@ -37,203 +37,219 @@ Android app recomposes the UI instantly
 
 | Module | Type | Purpose |
 |---|---|---|
-| **ketoy-devtools** | Android library | Client-side: \`KetoyDevWrapper\`, \`KetoyDevClient\`, connection UI |
-| **ketoy-devtools-server** | JVM application | Server-side: HTTP + WebSocket server, file watching |
-| **ketoy-sdk** | Android library | Core SDK with \`KetoyScreen\`, JSON renderer, DSL |
+| **ketoy-sdk** | Android library | Core SDK with devtools, JSON renderer, DSL, and export system |
+| **ketoy-gradle-plugin** | Gradle plugin | Ketoy tasks (\`ketoyExport\`, \`ketoyServe\`, \`ketoyDev\`) |
+
+> **Note:** As of 0.1-beta.1, devtools are integrated directly into \`ketoy-sdk\`. No separate \`ketoy-devtools\` module is required.
 
 ### Gradle tasks at a glance
 
 | Task | Command | What it does |
 |---|---|---|
-| \`ketoyExport\` | \`./gradlew ketoyExport\` | Run \`ExportScreensTest\` → write JSON to \`ketoy-screens/\` |
+| \`ketoyExport\` | \`./gradlew ketoyExport\` | Run \`KetoyAutoExportTest\` → write JSON to \`ketoy-screens/\` |
+| \`ketoyExportProd\` | \`./gradlew ketoyExportProd\` | Export for production → write JSON to \`ketoy-export/\` with manifests |
 | \`ketoyServe\` | \`./gradlew ketoyServe\` | Start the dev server (watches \`ketoy-screens/\` for JSON changes) |
 | \`ketoyDev\` | \`./gradlew ketoyDev\` | Start dev server **with** auto-export (recommended — single command) |`,
     },
 
-    // ── Step 1: Write the Export Test ──
+    // ── Step 1: Declare Screen Exports (ketoyExport DSL) ──
     {
-      id: 'export-test',
-      title: 'Step 1 — Write the Export Test',
-      content: `Create a unit test class that declares every screen and its DSL builder. This test is triggered by \`./gradlew ketoyExport\` and writes \`.json\` files to \`ketoy-screens/\`.
+      id: 'export-dsl',
+      title: 'Step 1 — Declare Screen Exports',
+      content: `Instead of writing manual test classes, define exports **inline alongside your screen composables** using the \`ketoyExport()\` DSL. This becomes the **single source of truth** for what gets exported.
 
-Place the file at \`app/src/test/java/.../ExportScreensTest.kt\`:`,
-      code: `class ExportScreensTest {
+Place the export definition at the top of your screen file:`,
+      code: `// HomeScreen.kt
+import com.developerstring.ketoy.export.ketoyExport
+import com.developerstring.ketoy.util.KData
 
-    private val outputDir = File(System.getProperty("user.dir") ?: ".")
-        .resolve("../ketoy-screens")
-
-    // ── Screen definitions ──────────────────────────────────
-
-    private val screens = listOf(
-        // Multi-content screen (multiple KetoyContent blocks)
-        KetoyScreen(screenName = "home", displayName = "Home").apply {
-            addContent(name = "cards", nodeBuilder = {
-                buildHomeCards(
-                    userName = "Test User",
-                    totalBalance = "\\$12,450.00",
-                    income = "\\$4,200.00",
-                    notificationCount = 3,
-                    isDark = true
-                )
-            })
-            addContent(name = "transactions", nodeBuilder = {
-                buildHomeTransactions(
-                    transactions = listOf(
-                        Triple("Salary", "Today", "+\\$4,200.00"),
-                        Triple("Groceries", "Yesterday", "-\\$85.50"),
-                    ),
-                    isDark = true
-                )
-            })
-        },
-
-        // Single-content screens (shorthand)
-        KetoyScreen.fromNode("profile", displayName = "Profile") {
-            buildProfileScreen(userName = "Test User", isDark = true)
-        },
-        KetoyScreen.fromNode("analytics", displayName = "Analytics") {
-            buildAnalyticsScreen(
-                income = "\\$4,200.00",
-                expenses = "\\$2,150.00",
-                savings = "\\$2,050.00",
-                isDark = true
-            )
-        },
-    )
-
-    // ── Export ───────────────────────────────────────────────
-
-    @Test
-    fun exportAllScreens() {
-        outputDir.mkdirs()
-
-        // Export screens
-        var exported = 0
-        screens.forEach { screen ->
-            val json = screen.buildExportJson()
-            if (json != null) {
-                val file = File(outputDir, "\${screen.screenName}.json")
-                file.writeText(json)
-                println("📄 Exported: \${screen.screenName} → \${file.absolutePath}")
-                exported++
-            }
-        }
-
-        // Register and export navigation graphs
-        AppNavGraphs.registerAll()
-        val allNavGraphs = KetoyNavRegistry.getAll().values
-
-        var navExported = 0
-        allNavGraphs.forEach { graph ->
-            val json = graph.toJson()
-            val file = File(outputDir, "nav_\${graph.navHostName}.json")
-            file.writeText(json)
-            println("🗺️  Nav exported: \${graph.navHostName}")
-            navExported++
-        }
-
-        println("✅ Exported \$exported screen(s) + \$navExported nav graph(s)")
+/**
+ * Export definition for Home screen — single source of truth.
+ * Uses KData template variables for dynamic values.
+ */
+val homeExport = ketoyExport("home", displayName = "Home") {
+    content("cards") {
+        buildHomeCards(
+            userName = KData.user("name"),
+            totalBalance = KData.user("totalBalance"),
+            income = KData.user("income"),
+            notificationCount = KData.user("notificationCount"),
+        )
     }
-}`,
-      language: 'kotlin',
-      subsections: [
-        {
-          id: 'export-test-multi-content',
-          title: 'Multi-Content Screens',
-          content: `For screens that use multiple \`KetoyContent\` blocks (e.g. Home with a "cards" section and a "transactions" section), create the \`KetoyScreen\` manually and call \`addContent()\` for each block:`,
-          code: `KetoyScreen(screenName = "home", displayName = "Home").apply {
-    addContent(name = "cards", nodeBuilder = {
-        buildHomeCards(userName = "Test User", ...)
-    })
-    addContent(name = "transactions", nodeBuilder = {
-        buildHomeTransactions(transactions = testData, ...)
-    })
-}`,
-          language: 'kotlin',
-        },
-        {
-          id: 'export-test-single-content',
-          title: 'Single-Content Screens',
-          content: `For screens with a single \`KetoyContent\` (the default "main" block), use the \`KetoyScreen.fromNode\` shorthand:`,
-          code: `KetoyScreen.fromNode("profile", displayName = "Profile") {
-    buildProfileScreen(userName = "Test User", isDark = true)
-}`,
-          language: 'kotlin',
-        },
-        {
-          id: 'export-test-nav-graphs',
-          title: 'Exporting Navigation Graphs',
-          content: `Register your nav graphs with \`KetoyNavRegistry\`, then iterate and export each one as \`nav_{navHostName}.json\`:`,
-          code: `AppNavGraphs.registerAll()
-val allNavGraphs = KetoyNavRegistry.getAll().values
-
-allNavGraphs.forEach { graph ->
-    val json = graph.toJson()
-    val file = File(outputDir, "nav_\${graph.navHostName}.json")
-    file.writeText(json)
-}`,
-          language: 'kotlin',
-        },
-      ],
-    },
-
-    // ── Step 2: KetoyDevExporter (alternative) ──
-    {
-      id: 'dev-exporter',
-      title: 'Step 2 (Alternative) — KetoyDevExporter',
-      content: `If you prefer a DSL-based approach instead of raw \`KetoyScreen\` objects, subclass \`KetoyDevExporter\` and register screens with trailing-lambda DSL builders:`,
-      code: `class MyScreenExporter : KetoyDevExporter() {
-
-    override fun registerScreens() {
-        screen("home") {
-            KColumn(modifier = KMod(fillMaxSize = true)) {
-                KText(text = "Hello World!")
-                KText(text = "Balance: \\$12,450", fontSize = 24)
-            }
-        }
-        screen("profile") {
-            KColumn {
-                KText(text = "Profile Screen")
-                KText(text = "User: Test User")
-            }
-        }
+    content("transactions") {
+        buildHomeTransactions()
     }
 }
 
-// In a test or Gradle task:
-val exporter = MyScreenExporter()
-
-// Option A: Export to directory
-exporter.exportTo(File("ketoy-screens"))
-// → ketoy-screens/home.json
-// → ketoy-screens/profile.json
-
-// Option B: Get JSON map without writing to disk
-val jsonMap: Map<String, String> = exporter.export()`,
+// The screen composable (unchanged)
+@Composable
+fun HomeScreen(userName: String, totalBalance: String, /* ... */) {
+    ProvideKetoyScreen(screenName = "home") {
+        // ... your UI code
+        KetoyContent(name = "cards", data = mapOf("name" to userName, /* ... */)) {
+            // fallback UI
+        }
+    }
+}`,
       language: 'kotlin',
       subsections: [
         {
-          id: 'dev-exporter-api',
-          title: 'KetoyDevExporter API',
-          table: {
-            headers: ['Method', 'Returns', 'Description'],
-            rows: [
-              ['registerScreens()', 'Unit', 'Override this — call screen() for each screen you want to export.'],
-              ['screen(name, builder)', 'Unit', 'Register a screen with a KUniversalScope DSL builder.'],
-              ['buildAll()', 'Map<String, String>', 'Execute all builders and serialize to JSON.'],
-              ['exportTo(directory)', 'Unit', 'Build all screens and write individual .json files to the directory.'],
-              ['export()', 'Map<String, String>', 'Alias for buildAll() — returns JSON without writing to disk.'],
-            ],
-          },
+          id: 'single-content-export',
+          title: 'Single-Content Screens',
+          content: `For screens with a single content block, use the shorthand:`,
+          code: `val profileExport = ketoyExport("profile") {
+    content {
+        buildProfileScreen(
+            userName = KData.user("name"),
+            darkModeIcon = KData.user("darkModeIcon"),
+        )
+    }
+}`,
+          language: 'kotlin',
+        },
+        {
+          id: 'multi-content-export',
+          title: 'Multi-Content Screens',
+          content: `For screens with multiple \`KetoyContent\` blocks, declare each with a name:`,
+          code: `val homeExport = ketoyExport("home", displayName = "Home") {
+    content("cards") {
+        buildHomeCards(userName = KData.user("name"))
+    }
+    content("transactions") {
+        buildHomeTransactions()
+    }
+}`,
+          language: 'kotlin',
+        },
+        {
+          id: 'nav-export',
+          title: 'Exporting Navigation Graphs',
+          content: `Register nav graphs for export using \`ketoyNavExport()\`:`,
+          code: `// In AppNavGraphs.kt or a dedicated exports file
+import com.developerstring.ketoy.export.ketoyNavExport
+
+val mainNavExport = ketoyNavExport(AppNavGraphs.main)
+val demoNavExport = ketoyNavExport(AppNavGraphs.demo)`,
+          language: 'kotlin',
+        },
+        {
+          id: 'kdata-templates',
+          title: 'KData Template Variables',
+          content: `Use \`KData\` to insert template placeholders that resolve at runtime:
+
+| Method | Template Output | Description |
+|---|---|---|
+| \`KData.user("key")\` | \`{{data:user:key}}\` | User-provided data from \`KetoyContent(data = ...)\` |
+| \`KData.ref("refId")\` | \`{{data:ref:refId}}\` | Reference to shared/global data |
+
+At runtime, the SDK replaces these placeholders with actual values from the \`data\` map.`,
         },
       ],
     },
 
-    // ── Step 3: Run the Export ──
+    // ── Step 2: Create AppExports Manifest ──
+    {
+      id: 'app-exports',
+      title: 'Step 2 — Create AppExports Manifest',
+      content: `Create an \`AppExports\` object that references all your export definitions. This triggers class-loading so the export runner can discover them:`,
+      code: `// AppExports.kt
+package com.yourapp
+
+import com.yourapp.screens.*
+
+/**
+ * Export manifest — triggers class-loading for all screen and nav exports.
+ */
+object AppExports {
+    init {
+        // ── Screen exports ───────────────────────────────
+        homeExport
+        profileExport
+        analyticsExport
+        cardsExport
+        historyExport
+
+        // ── Nav graph exports ────────────────────────────
+        mainNavExport
+        demoNavExport
+    }
+
+    /** Call this to ensure all exports are registered. */
+    fun ensureLoaded() { /* init block does the work */ }
+}`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'adding-new-screen',
+          title: 'Adding a New Screen',
+          content: `To add a new screen to the export:
+
+1. Add \`ketoyExport(...)\` at the top of your screen file
+2. Reference the export val in \`AppExports.init {}\`
+
+That's it — no separate test files, no manual builders, no duplication.`,
+        },
+      ],
+    },
+
+    // ── Step 3: Create the Export Test ──
+    {
+      id: 'export-test',
+      title: 'Step 3 — Create KetoyAutoExportTest',
+      content: `Create a single test class that runs all exports. This replaces the old manual \`ExportScreensTest\` and \`ProductionExportTest\`:`,
+      code: `// app/src/test/java/.../KetoyAutoExportTest.kt
+class KetoyAutoExportTest {
+
+    private val runner = KetoyAutoExportRunner()
+
+    @Before
+    fun setUp() {
+        // Ensure all exports are registered via class-loading
+        AppExports.ensureLoaded()
+    }
+
+    @Test
+    fun exportForDevServer() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-screens")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = false  // dev server doesn't need manifests
+        )
+        println(result)
+    }
+
+    @Test
+    fun exportForProduction() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-export")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = true  // production needs manifests
+        )
+        println(result)
+    }
+}`,
+      language: 'kotlin',
+      subsections: [
+        {
+          id: 'how-auto-export-works',
+          title: 'How It Works',
+          content: `\`KetoyAutoExportRunner\` reads all registered exports from \`KetoyExportRegistry\`:
+
+1. **Screen files** register via \`ketoyExport(...)\` — self-registering on class-load
+2. **Nav graphs** register via \`ketoyNavExport(...)\`
+3. **AppExports** references all export vals to trigger class-loading
+4. **The runner** iterates the registry and writes JSON files
+
+No manual screen listings, no builder duplication, no keeping test code in sync with screen code.`,
+        },
+      ],
+    },
+
+    // ── Step 4: Run the Export ──
     {
       id: 'run-export',
-      title: 'Step 3 — Run the Export',
-      content: `Use the \`ketoyExport\` Gradle task to execute your \`ExportScreensTest\` and generate JSON files:`,
+      title: 'Step 4 — Run the Export',
+      content: `Use the \`ketoyExport\` Gradle task to run \`KetoyAutoExportTest\` and generate JSON files:`,
       code: `./gradlew ketoyExport`,
       language: 'bash',
       subsections: [
@@ -258,40 +274,33 @@ The dev server watches this directory. Any file change triggers a push to connec
         {
           id: 'export-how-works',
           title: 'How the Gradle Task Works',
-          content: `\`ketoyExport\` is a convenience task defined in your root \`build.gradle.kts\`. It runs:
+          content: `\`ketoyExport\` is registered by the \`dev.ketoy.devtools\` Gradle plugin:
 
 \`\`\`kotlin
-// build.gradle.kts
-tasks.register("ketoyExport") {
-    group = "ketoy"
-    description = "Export Ketoy DSL screens to JSON files for the dev server"
-    dependsOn(":app:testDebugUnitTest")
+// The plugin registers these tasks automatically
+tasks {
+    register("ketoyExport") {
+        group = "ketoy"
+        description = "Export screens for dev server"
+        // Runs KetoyAutoExportTest.exportForDevServer()
+    }
+    register("ketoyExportProd") {
+        group = "ketoy"
+        description = "Export screens for production"
+        // Runs KetoyAutoExportTest.exportForProduction()
+    }
 }
 \`\`\`
 
-When triggered, **only** \`ExportScreensTest\` runs (not your other tests):
-
-\`\`\`kotlin
-gradle.taskGraph.whenReady {
-    if (hasTask(":ketoyExport") || hasTask("ketoyExport")) {
-        allTasks.filterIsInstance<Test>()
-            .filter { it.path == ":app:testDebugUnitTest" }
-            .forEach { task ->
-                task.filter {
-                    includeTestsMatching("*.ExportScreensTest")
-                }
-            }
-    }
-}
-\`\`\``,
+Both tasks run \`KetoyAutoExportTest\` — the difference is just the output directory and whether manifests are generated.`,
         },
       ],
     },
 
-    // ── Step 4: Start the Dev Server ──
+    // ── Step 5: Add KetoyDevWrapper to your app ──
     {
       id: 'dev-server',
-      title: 'Step 4 — Start the Dev Server',
+      title: 'Step 5 — Start the Dev Server',
       content: `The Ketoy Dev Server is a JVM application that serves screen JSON over HTTP and pushes live updates via WebSocket. Two ways to start it:`,
       code: `# Option A: JSON-only watching (manually run ketoyExport when DSL changes)
 ./gradlew ketoyServe
@@ -365,10 +374,10 @@ gradle.taskGraph.whenReady {
       ],
     },
 
-    // ── Step 5: Add KetoyDevWrapper to your app ──
+    // ── Step 6: Add KetoyDevWrapper ──
     {
       id: 'dev-wrapper',
-      title: 'Step 5 — Add KetoyDevWrapper',
+      title: 'Step 6 — Add KetoyDevWrapper',
       content: `\`KetoyDevWrapper\` wraps your **entire app** to enable hot-reload. Your app runs normally — behind the scenes the wrapper connects to the dev server, receives JSON updates, and injects them into the matching \`KetoyScreen\` instances.`,
       code: `class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -636,24 +645,25 @@ FileWatcher / SourceWatcher
     {
       id: 'dependency-setup',
       title: 'Dependency Setup',
-      content: `Add \`ketoy-devtools\` as a **debug-only** dependency so it's stripped from release builds:`,
+      content: `Devtools are integrated directly into \`ketoy-sdk\`. No separate module is required:`,
       code: `// app/build.gradle.kts
 dependencies {
-    // Core SDK (always included)
+    // Core SDK (includes devtools)
     implementation(project(":ketoy-sdk"))
+}
 
-    // Dev tools (debug builds only)
-    debugImplementation(project(":ketoy-devtools"))
+// settings.gradle.kts — apply the Gradle plugin
+plugins {
+    id("dev.ketoy.devtools") version "0.1-beta.1"
 }`,
       language: 'kotlin',
       subsections: [
         {
           id: 'conditional-wrapper',
           title: 'Conditional Wrapper in Release',
-          content: `Since \`ketoy-devtools\` is only available in debug, wrap it conditionally:`,
+          content: `\`KetoyDevWrapper\` is always available in the SDK but should only be used in debug builds. Wrap it conditionally:`,
           code: `setContent {
     MyTheme {
-        // KetoyDevWrapper is only available in debug builds
         if (BuildConfig.DEBUG) {
             KetoyDevWrapper {
                 MainApp()
@@ -688,13 +698,15 @@ The \`KetoyDevConnectScreen\` automatically detects emulators and pre-fills \`10
       title: 'Best Practices',
       content: `**Use \`./gradlew ketoyDev\` as your default** — It starts the server, watches your Kotlin sources, and auto-exports JSON. One command for the complete loop.
 
-**Keep test data realistic** — The export test uses hardcoded test values (e.g., "Test User", "$12,450"). Make them visually representative so the preview is useful.
+**Define exports alongside screens** — Place \`ketoyExport(...)\` at the top of each screen file. This keeps the export definition and screen code together as a single source of truth.
 
-**Use isDark = true in exports** — The test export convention is dark theme. The dev server preview renders against a dark background by default.
+**Use \`KData\` template variables** — Instead of hardcoding test values, use \`KData.user("key")\` so exports contain template placeholders that resolve at runtime.
+
+**Keep \`AppExports\` up to date** — When adding a new screen, don't forget to reference its export val in \`AppExports.init {}\`.
 
 **Don't commit \`ketoy-screens/\`** — The directory contains generated JSON. Add it to \`.gitignore\`. Regenerate it with \`./gradlew ketoyExport\`.
 
-**Strip devtools from release** — Use \`debugImplementation\` for \`ketoy-devtools\`. Wrap \`KetoyDevWrapper\` in a \`BuildConfig.DEBUG\` check.
+**Wrap devtools in DEBUG check** — Use \`KetoyDevWrapper\` only in debug builds. It's available in the SDK but should be guarded with \`BuildConfig.DEBUG\`.
 
 **Export after DSL changes** — If not using \`ketoyDev\` (auto-export), remember to run \`./gradlew ketoyExport\` after editing your DSL builders.`,
     },

@@ -5,7 +5,255 @@
 
 const exportData = {
 
-  /* ── Export > Production Export ── */
+  /* ── Export > Registry & Auto Export ── */
+
+  KetoyExportRegistry: {
+    name: 'KetoyExportRegistry',
+    kind: 'object',
+    module: 'export',
+    subpackage: 'registry',
+    category: 'Export',
+    subcategory: 'Export Registry',
+    description: 'Central registry for all screen export definitions. Screen files register their export configuration here via ketoyExport(), and the export runner (KetoyAutoExportRunner) reads them to produce JSON files — no manual test classes or boilerplate needed.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [
+        'import com.developerstring.ketoy.navigation.KetoyNavGraph',
+      ],
+      sourceCode: `object KetoyExportRegistry {
+
+    val screens: List<ScreenExportDefinition>
+    val navGraphs: List<KetoyNavGraph>
+
+    fun registerScreen(definition: ScreenExportDefinition)
+    fun registerNavGraph(graph: KetoyNavGraph)
+    fun clear()
+}`,
+    },
+    properties: [
+      { name: 'screens', type: 'List<ScreenExportDefinition>', default: '[]', description: 'All registered screen export definitions (read-only).' },
+      { name: 'navGraphs', type: 'List<KetoyNavGraph>', default: '[]', description: 'All registered nav graph exports (read-only).' },
+    ],
+    methods: [
+      { name: 'registerScreen(definition: ScreenExportDefinition)', returns: 'Unit', description: 'Register a screen export definition. Called automatically by ketoyExport(). Replaces existing registration with same screenName.' },
+      { name: 'registerNavGraph(graph: KetoyNavGraph)', returns: 'Unit', description: 'Register a navigation graph for export. Called automatically by ketoyNavExport().' },
+      { name: 'clear()', returns: 'Unit', description: 'Clear all registrations. Used for testing.' },
+    ],
+    usage: `// Screen files register via ketoyExport():
+val profileExport = ketoyExport("profile") {
+    content { buildProfileScreen(userName = KData.user("name")) }
+}
+
+// Runner reads from registry:
+val screens = KetoyExportRegistry.screens
+val navGraphs = KetoyExportRegistry.navGraphs`,
+    notes: 'You typically don\'t interact with this directly. Use ketoyExport() and ketoyNavExport() to register, and KetoyAutoExportRunner to export.',
+    seeAlso: ['ketoyExport', 'ketoyNavExport', 'KetoyAutoExportRunner', 'ScreenExportDefinition'],
+  },
+
+  KetoyAutoExportRunner: {
+    name: 'KetoyAutoExportRunner',
+    kind: 'class',
+    module: 'export',
+    subpackage: 'runner',
+    category: 'Export',
+    subcategory: 'Export Runner',
+    description: 'Automatic export runner that reads all registered screen exports from KetoyExportRegistry and writes JSON files to disk. Replaces the manual ExportScreensTest, ProductionExportTest, and KetoyProductionExport patterns with a fully automatic flow.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [
+        'import java.io.File',
+      ],
+      sourceCode: `class KetoyAutoExportRunner {
+
+    fun exportAll(
+        outputDir: File,
+        clearExisting: Boolean = true,
+        writeManifests: Boolean = true
+    ): ExportResult
+}`,
+    },
+    methods: [
+      { name: 'exportAll(outputDir, clearExisting?, writeManifests?)', returns: 'ExportResult', description: 'Export all registered screens and nav graphs to the given directory. Creates the directory if needed. clearExisting removes old .json files before writing. writeManifests generates navigation_manifest.json and screen_manifest.json.' },
+    ],
+    usage: `// In KetoyAutoExportTest:
+class KetoyAutoExportTest {
+    private val runner = KetoyAutoExportRunner()
+
+    @Before
+    fun setUp() {
+        AppExports.ensureLoaded()
+    }
+
+    @Test
+    fun exportForDevServer() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-screens")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = false
+        )
+        println(result)
+    }
+
+    @Test
+    fun exportForProduction() {
+        val outputDir = File(System.getProperty("user.dir") ?: ".").resolve("../ketoy-export")
+        val result = runner.exportAll(
+            outputDir = outputDir,
+            writeManifests = true
+        )
+        println(result)
+    }
+}`,
+    notes: 'Run via Gradle: ./gradlew ketoyExport (dev server) or ./gradlew ketoyExportProd (production). Both tasks run KetoyAutoExportTest with different output directories.',
+    seeAlso: ['KetoyExportRegistry', 'ketoyExport', 'ExportResult', 'ScreenExportDefinition'],
+  },
+
+  ScreenExportDefinition: {
+    name: 'ScreenExportDefinition',
+    kind: 'data class',
+    module: 'export',
+    subpackage: 'definition',
+    category: 'Export',
+    subcategory: 'Export Definition',
+    description: 'Export definition for a single screen, containing one or more named content blocks. Created by ketoyExport() DSL.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [],
+      sourceCode: `data class ScreenExportDefinition(
+    val screenName: String,
+    val displayName: String = screenName.replace("_", " ")
+        .replaceFirstChar { it.uppercaseChar() },
+    val description: String = "",
+    val version: String = "1.0.0",
+    val contents: List<ContentExportDefinition> = emptyList()
+)`,
+    },
+    properties: [
+      { name: 'screenName', type: 'String', default: '—', description: 'Unique identifier matching ProvideKetoyScreen(screenName = ...).' },
+      { name: 'displayName', type: 'String', default: 'auto from screenName', description: 'Human-readable name for manifests and tooling.' },
+      { name: 'description', type: 'String', default: '""', description: 'Optional description of the screen.' },
+      { name: 'version', type: 'String', default: '"1.0.0"', description: 'Semantic version for this screen\'s export.' },
+      { name: 'contents', type: 'List<ContentExportDefinition>', default: '[]', description: 'Content blocks (name → node builder).' },
+    ],
+    usage: `// Created via ketoyExport():
+val homeExport = ketoyExport("home", displayName = "Home") {
+    content("cards") { buildHomeCards(...) }
+    content("transactions") { buildHomeTransactions() }
+}`,
+    seeAlso: ['ketoyExport', 'ContentExportDefinition', 'KetoyExportRegistry'],
+  },
+
+  ContentExportDefinition: {
+    name: 'ContentExportDefinition',
+    kind: 'data class',
+    module: 'export',
+    subpackage: 'definition',
+    category: 'Export',
+    subcategory: 'Export Definition',
+    description: 'A single content block within a screen export. Created by content() calls inside ketoyExport() DSL.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [
+        'import com.developerstring.ketoy.model.KNode',
+      ],
+      sourceCode: `data class ContentExportDefinition(
+    val name: String,
+    val nodeBuilder: () -> KNode
+)`,
+    },
+    properties: [
+      { name: 'name', type: 'String', default: '—', description: 'Content name matching KetoyContent(name = ...).' },
+      { name: 'nodeBuilder', type: '() -> KNode', default: '—', description: 'Lambda that produces the KNode tree for export.' },
+    ],
+    usage: `// Created inside ketoyExport():
+ketoyExport("profile") {
+    content("header") { buildProfileHeader() }
+    content("stats") { buildProfileStats() }
+}`,
+    seeAlso: ['ScreenExportDefinition', 'ketoyExport', 'KNode'],
+  },
+
+  ketoyExport: {
+    name: 'ketoyExport',
+    kind: 'function',
+    module: 'export',
+    subpackage: 'dsl',
+    category: 'Export',
+    subcategory: 'Export DSL',
+    description: 'Declare and register a screen export definition. Place this alongside your screen composable — it becomes the single source of truth for what gets exported. Self-registers with KetoyExportRegistry on invocation.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [
+        'import com.developerstring.ketoy.util.KData',
+      ],
+      sourceCode: `fun ketoyExport(
+    screenName: String,
+    displayName: String = screenName.replace("_", " ").replaceFirstChar { it.uppercaseChar() },
+    description: String = "",
+    version: String = "1.0.0",
+    builder: ScreenExportBuilder.() -> Unit
+): ScreenExportDefinition`,
+    },
+    parameters: [
+      { name: 'screenName', type: 'String', default: '—', description: 'Unique screen identifier.' },
+      { name: 'displayName', type: 'String', default: 'auto from screenName', description: 'Human-readable label (auto-derived if omitted).' },
+      { name: 'description', type: 'String', default: '""', description: 'Optional description.' },
+      { name: 'version', type: 'String', default: '"1.0.0"', description: 'Semantic version.' },
+      { name: 'builder', type: 'ScreenExportBuilder.() -> Unit', default: '—', description: 'Lambda to declare content blocks.' },
+    ],
+    usage: `// Single-content screen
+val profileExport = ketoyExport("profile") {
+    content {
+        buildProfileScreen(userName = KData.user("name"))
+    }
+}
+
+// Multi-content screen
+val homeExport = ketoyExport("home", displayName = "Home") {
+    content("cards") {
+        buildHomeCards(userName = KData.user("name"))
+    }
+    content("transactions") {
+        buildHomeTransactions()
+    }
+}`,
+    notes: 'The export definition self-registers with KetoyExportRegistry when the containing file is class-loaded. Reference the export val in AppExports to ensure it loads.',
+    seeAlso: ['ScreenExportDefinition', 'KetoyExportRegistry', 'KetoyAutoExportRunner', 'KData'],
+  },
+
+  ketoyNavExport: {
+    name: 'ketoyNavExport',
+    kind: 'function',
+    module: 'export',
+    subpackage: 'dsl',
+    category: 'Export',
+    subcategory: 'Export DSL',
+    description: 'Register a navigation graph for export. Self-registers with KetoyExportRegistry on invocation.',
+    android: {
+      packageName: 'com.developerstring.ketoy.export',
+      annotations: [],
+      imports: [
+        'import com.developerstring.ketoy.navigation.KetoyNavGraph',
+      ],
+      sourceCode: `fun ketoyNavExport(graph: KetoyNavGraph): KetoyNavGraph`,
+    },
+    parameters: [
+      { name: 'graph', type: 'KetoyNavGraph', default: '—', description: 'The nav graph to register for export.' },
+    ],
+    usage: `// In AppNavGraphs.kt or screen file:
+val mainNavExport = ketoyNavExport(AppNavGraphs.main)
+val demoNavExport = ketoyNavExport(AppNavGraphs.demo)`,
+    notes: 'Reference the export val in AppExports to ensure the nav graph is registered during class-loading.',
+    seeAlso: ['KetoyExportRegistry', 'KetoyNavGraph', 'KetoyAutoExportRunner'],
+  },
+
+  /* ── Export > Legacy Production Export (Deprecated) ── */
 
   KetoyProductionExport: {
     name: 'KetoyProductionExport',
@@ -13,17 +261,18 @@ const exportData = {
     module: 'export',
     subpackage: 'production',
     category: 'Export',
-    subcategory: 'Production Export',
-    description: 'Base class for declaring production screen and navigation exports. Client apps extend this class to register their production screens and navigation graphs. Unlike the dev-server export, the production export has no test data, no dummy placeholders, and no dev tooling — exports are self-contained JSON for runtime use.',
+    subcategory: 'Production Export (Deprecated)',
+    description: '**DEPRECATED:** Use ketoyExport() DSL and KetoyAutoExportRunner instead. This class-based approach has been replaced by the simpler, co-located export pattern where exports are defined inline with screen composables.',
     android: {
       packageName: 'com.developerstring.ketoy.export',
-      annotations: [],
+      annotations: ['@Deprecated'],
       imports: [
         'import com.developerstring.ketoy.core.toJson',
         'import com.developerstring.ketoy.model.KNode',
         'import com.developerstring.ketoy.navigation.KetoyNavGraph',
       ],
-      sourceCode: `abstract class KetoyProductionExport {
+      sourceCode: `@Deprecated("Use ketoyExport() DSL instead")
+abstract class KetoyProductionExport {
 
     val screens: List<ScreenDefinition>
     val navGraphs: List<KetoyNavGraph>
