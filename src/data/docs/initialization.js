@@ -19,16 +19,16 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
 
 | Build System | Config File | Latest Version |
 |---|---|---|
-| Kotlin DSL | \`build.gradle.kts\` | \`0.1.1-beta\` |
-| Groovy DSL | \`build.gradle\` | \`0.1.1-beta\` |
-| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1.1-beta\` |`,
+| Kotlin DSL | \`build.gradle.kts\` | \`0.1.3-beta.2\` |
+| Groovy DSL | \`build.gradle\` | \`0.1.3-beta.2\` |
+| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1.3-beta.2\` |`,
       subsections: [
         {
           id: 'install-kotlin-dsl',
           title: 'Kotlin DSL',
           content: 'Add the dependency in your module-level `build.gradle.kts`:',
           code: `dependencies {
-        implementation("dev.ketoy:sdk:0.1.1-beta")
+        implementation("dev.ketoy:sdk:0.1.3-beta.2")
 }`,
           language: 'kotlin',
           codeTitle: 'build.gradle.kts',
@@ -38,7 +38,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Groovy DSL',
           content: 'Add the dependency in your module-level `build.gradle`:',
           code: `dependencies {
-        implementation 'dev.ketoy:sdk:0.1.1-beta'
+        implementation 'dev.ketoy:sdk:0.1.3-beta.2'
 }`,
           language: 'groovy',
           codeTitle: 'build.gradle',
@@ -48,7 +48,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Version Catalog (TOML)',
           content: 'If you use a Gradle version catalog, declare the version and library in `libs.versions.toml`:',
           code: `[versions]
-ketoy = "0.1.1-beta"
+ketoy = "0.1.3-beta.2"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`,
@@ -98,7 +98,7 @@ pluginManagement {
 
 // root build.gradle.kts
 plugins {
-  id("dev.ketoy.devtools") version "0.1.1-beta"
+  id("dev.ketoy.devtools") version "0.1.5-beta.10"
 }`,
       language: 'kotlin',
     },

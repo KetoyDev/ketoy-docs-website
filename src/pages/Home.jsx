@@ -101,14 +101,23 @@ export default function Home() {
         <h2>Installation</h2>
         <p className="home__gallery-sub">
           Add Ketoy to your Android project. Always use the{' '}
-          <strong>latest version</strong>{' '}—{' '}
+          <strong>latest versions</strong>{' '}—{' '}
           <a
             href="https://central.sonatype.com/artifact/dev.ketoy/sdk"
             target="_blank"
             rel="noopener noreferrer"
             className="home__install-maven-link"
           >
-            check Maven Central for the latest release ↗
+            check Maven Central's latest release ↗ 
+          </a> 
+          {' '} | {' '}
+          <a
+            href="https://plugins.gradle.org/plugin/dev.ketoy.devtools"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="home__install-maven-link"
+          >
+            check Gradle Plugin's latest release ↗
           </a>
         </p>
 
@@ -126,17 +135,17 @@ export default function Home() {
               <tr>
                 <td>Kotlin DSL</td>
                 <td><code>build.gradle.kts</code></td>
-                <td><code>0.1.1-beta</code></td>
+                <td><code>0.1.3-beta.2</code></td>
               </tr>
               <tr>
                 <td>Groovy DSL</td>
                 <td><code>build.gradle</code></td>
-                <td><code>0.1.1-beta</code></td>
+                <td><code>0.1.3-beta.2</code></td>
               </tr>
               <tr>
                 <td>Version Catalog (TOML)</td>
                 <td><code>libs.versions.toml</code></td>
-                <td><code>0.1.1-beta</code></td>
+                <td><code>0.1.3-beta.2</code></td>
               </tr>
             </tbody>
           </table>
@@ -144,10 +153,22 @@ export default function Home() {
 
         {/* Code blocks */}
         <div className="home__install-blocks">
+          <h4 className="home__install-format-label">Gradle Plugin Setup</h4>
+          <p className="home__gallery-sub">
+            Gradle plugin setup in the same <code>build.gradle.kts</code> file:
+          </p>
+          <CodeBlock
+            code={`plugins {
+    id("dev.ketoy.devtools") version "0.1.5-beta.10" apply false
+}`}
+            language="kotlin"
+            title="build.gradle.kts"
+          />
+
           <h4 className="home__install-format-label">Kotlin DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation("dev.ketoy:sdk:0.1.1-beta")
+    implementation("dev.ketoy:sdk:0.1.3-beta.2")
 }`}
             language="kotlin"
             title="build.gradle.kts"
@@ -156,7 +177,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Groovy DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation 'dev.ketoy:sdk:0.1.1-beta'
+    implementation 'dev.ketoy:sdk:0.1.3-beta.2'
 }`}
             language="groovy"
             title="build.gradle"
@@ -165,7 +186,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Version Catalog (TOML)</h4>
           <CodeBlock
             code={`[versions]
-ketoy = "0.1.1-beta"
+ketoy = "0.1.3-beta.2"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`}
