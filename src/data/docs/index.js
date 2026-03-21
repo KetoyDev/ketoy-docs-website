@@ -3,6 +3,7 @@
  * Aggregates all documentation modules and provides helper functions.
  */
 
+import quickStartDoc from './quick-start'
 import initializationDoc from './initialization'
 import layoutsDoc from './layouts'
 import screensDoc from './screens'
@@ -21,6 +22,7 @@ import kAdvancedDoc from './kadvanced'
 
 /** Guide documentation entries (Initialization, Layouts) */
 const guideDocs = {
+  [quickStartDoc.id]: quickStartDoc,
   [initializationDoc.id]: initializationDoc,
   [layoutsDoc.id]: layoutsDoc,
   [screensDoc.id]: screensDoc,

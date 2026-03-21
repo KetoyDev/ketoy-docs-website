@@ -85,7 +85,7 @@ export default function Home() {
             { name: 'Classes & Objects', version: `${allClasses.length}` },
             { name: 'Categories', version: `${Object.keys(byCategory).length}` },
             { name: 'Platform', version: 'Android' },
-            { name: 'Min SDK', version: 'API 21+' },
+            { name: 'Min SDK', version: 'API 26+' },
             { name: 'Language', version: 'Kotlin' },
           ].map((p) => (
             <div key={p.name} className="home__platform-chip">

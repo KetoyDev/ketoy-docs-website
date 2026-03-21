@@ -3,6 +3,7 @@
  * Aggregates all package-level reference data and exports helper functions.
  */
 
+import devtoolsData from './devtools'
 import annotationData from './annotation'
 import cloudData from './cloud'
 import coreData from './core'
@@ -21,6 +22,7 @@ import widgetData from './widget'
 
 /** Merged reference map (keyed by class name) */
 const referenceData = {
+  ...devtoolsData,
   ...annotationData,
   ...cloudData,
   ...coreData,
@@ -71,5 +73,5 @@ export function getClassesBySubpackage(module, subpackage) {
   )
 }
 
-export { annotationData, cloudData, coreData, dslData, exportData, ketoyData, modelData, navigationData, parserData, registryData, rendererData, screenData, themeData, utilData, widgetData }
+export { devtoolsData, annotationData, cloudData, coreData, dslData, exportData, ketoyData, modelData, navigationData, parserData, registryData, rendererData, screenData, themeData, utilData, widgetData }
 export default referenceData

@@ -30,6 +30,7 @@ const navigation = [
     type: 'section',
     label: 'guides',
     children: [
+      { label: 'Quick Start', path: '/docs/quick-start' },
       { label: 'Initialization', path: '/docs/initialization' },
       { label: 'Layouts', path: '/docs/layouts' },
       { label: 'Screens', path: '/docs/screens' },
@@ -723,6 +724,27 @@ const navigation = [
         label: 'loader',
         children: [
           { label: 'KetoyProductionNavLoader', path: '/reference/KetoyProductionNavLoader' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'section',
+    label: 'devtools',
+    children: [
+      {
+        type: 'section',
+        label: 'dev wrapper',
+        children: [
+          { label: 'KetoyDevWrapper', path: '/reference/KetoyDevWrapper' },
+        ],
+      },
+      {
+        type: 'section',
+        label: 'export pattern',
+        children: [
+          { label: 'AppExports', path: '/reference/AppExports' },
+          { label: 'KetoyAutoExportTest', path: '/reference/KetoyAutoExportTest' },
         ],
       },
     ],

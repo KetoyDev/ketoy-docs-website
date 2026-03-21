@@ -347,7 +347,7 @@ Ketoy.initialize(
   ],
   relatedReference: ['Ketoy', 'KetoyCloudConfig', 'KetoyCacheConfig', 'KetoyCloudService', 'ProvideKetoyScreen', 'KetoyContent', 'KetoyWidgetParser', 'KetoyActionParser'],
   nextDoc: 'layouts',
-  prevDoc: null,
+  prevDoc: 'quick-start',
 }
 
 export default initializationDoc
