@@ -17,7 +17,7 @@ const rendererData = {
     subpackage: 'core',
     category: 'Renderer',
     subcategory: 'Core',
-    description: 'Serializable data class representing a single node in the server-driven UI tree. Every JSON component definition is deserialized into a UIComponent before rendering. The tree is recursive — each node can have child nodes via the children property.',
+    description: 'Serializable data class representing a single node in the server-driven UI tree. Every .ktw wire or JSON component definition is deserialized into a UIComponent before rendering. The tree is recursive — each node can have child nodes via the children property.',
     android: {
       packageName: 'com.developerstring.ketoy.renderer',
       annotations: ['@Serializable'],
@@ -56,7 +56,7 @@ RenderComponent(root)`,
     subpackage: 'core',
     category: 'Renderer',
     subcategory: 'Core',
-    description: 'Top-level composable entry point that accepts a raw JSON string and renders it as a Jetpack Compose UI tree. Internally deserializes the string into a UIComponent, wraps rendering in a KetoyThemeProvider, and dispatches to RenderComponent.',
+    description: 'Top-level composable entry point that accepts a raw JSON string or wire-format string and renders it as a Jetpack Compose UI tree. The SDK auto-detects wire format (.ktw) vs plain JSON by inspecting magic bytes. Internally deserializes into a UIComponent, wraps rendering in a KetoyThemeProvider, and dispatches to RenderComponent. Prefer JSONBytesToUI() for .ktw wire payloads in production.',
     android: {
       packageName: 'com.developerstring.ketoy.renderer',
       annotations: ['@Composable'],
@@ -102,8 +102,70 @@ JSONStringToUI(
     value = jsonString,
     colorScheme = KetoyColorScheme(primary = "#6200EE")
 )`,
-    notes: 'This is the simplest way to render a server-driven UI. For finer control, deserialize the JSON yourself and call RenderComponent directly.',
-    seeAlso: ['RenderComponent', 'UIComponent', 'KetoyThemeProvider'],
+    notes: 'Deprecated in favour of JSONBytesToUI(). JSONStringToUI() is kept for migration and testing only — wire bytes are the production path.',
+    seeAlso: ['JSONBytesToUI', 'RenderComponent', 'UIComponent', 'KetoyThemeProvider'],
+  },
+
+  JSONBytesToUI: {
+    name: 'JSONBytesToUI',
+    kind: 'function',
+    module: 'renderer',
+    subpackage: 'core',
+    category: 'Renderer',
+    subcategory: 'Core',
+    description: 'Production entry-point: accepts compressed .ktw wire bytes and renders them as a Jetpack Compose UI tree. Calls KetoyWireFormat.autoDecode() which auto-detects the format (gzip + MessagePack, gzip-only, aliased JSON, or plain JSON) and applies the correct decoding layers. Wraps rendering in KetoyThemeProvider. If decoding fails, renders a red error text instead of crashing. Prefer this over JSONStringToUI() — wire bytes are 10-15× smaller than raw JSON.',
+    android: {
+      packageName: 'com.developerstring.ketoy.renderer',
+      annotations: ['@Composable'],
+      imports: [
+        'import androidx.compose.runtime.Composable',
+        'import com.developerstring.ketoy.renderer.JSONBytesToUI',
+        'import com.developerstring.ketoy.theme.KetoyColorScheme',
+      ],
+      sourceCode: `@Composable
+fun JSONBytesToUI(
+    data: ByteArray,
+    colorScheme: KetoyColorScheme? = null,
+) {
+    val result = remember(data) {
+        try {
+            val element = KetoyWireFormat.autoDecode(data)
+            Result.success(ketoyJson.decodeFromJsonElement<UIComponent>(element))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    val component = result.getOrNull()
+    if (component != null) {
+        KetoyThemeProvider(colorScheme = colorScheme) {
+            RenderComponent(component)
+        }
+    } else {
+        Text("Ketoy: decode error — \${result.exceptionOrNull()?.message ?: "unknown"}")
+    }
+}`,
+    },
+    properties: [
+      { name: 'data', type: 'ByteArray', description: 'Compressed wire bytes. Any format produced by the Ketoy wire pipeline is accepted: gzip+MessagePack (OPTIMIZED), gzip-only (GZIP_ONLY), aliased JSON (ALIASED), or plain JSON (NONE). autoDecode() detects the format automatically.' },
+      { name: 'colorScheme', type: 'KetoyColorScheme?', description: 'Optional custom colour scheme. When non-null, the tree is rendered inside a KetoyThemeProvider with this colour scheme. Defaults to null (uses the current Material 3 theme).' },
+    ],
+    methods: [],
+    innerClasses: [],
+    usage: `// Minimal — render wire bytes fetched from any source
+val wireBytes: ByteArray = fetchFromServer()
+JSONBytesToUI(data = wireBytes)
+
+// With a custom colour scheme
+JSONBytesToUI(
+    data = wireBytes,
+    colorScheme = KetoyColorScheme(primary = "#6200EE")
+)
+
+// From a KNode DSL tree (e.g. for testing)
+val node = KColumn { KText("Hello") }
+JSONBytesToUI(data = node.toWireBytes())`,
+    notes: 'This is the preferred rendering entry-point. KetoyCloudScreen, KetoyView, and all production screens call this internally. Use it directly only when you manage the network call yourself.',
+    seeAlso: ['JSONStringToUI', 'KetoyWireFormat', 'RenderComponent', 'KetoyCloudScreen', 'KetoyCloudScreenFromWireBytes'],
   },
 
   RenderComponent: {

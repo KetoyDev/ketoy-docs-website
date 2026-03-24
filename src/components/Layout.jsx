@@ -69,7 +69,7 @@ function Header({ onMenuToggle, menuOpen }) {
       </div>
 
       <div className="header__right">
-        <span className="badge">v0.1.1-beta</span>
+        <span className="badge">v0.1.4-beta</span>
         <a
           href="https://github.com/KetoyDev/ketoy"
           target="_blank"

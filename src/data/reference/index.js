@@ -19,6 +19,7 @@ import screenData from './screen'
 import themeData from './theme'
 import utilData from './util'
 import widgetData from './widget'
+import wireData from './wire'
 
 /** Merged reference map (keyed by class name) */
 const referenceData = {
@@ -38,6 +39,7 @@ const referenceData = {
   ...themeData,
   ...utilData,
   ...widgetData,
+  ...wireData,
 }
 
 /* ── Helper: get all classes as sorted array ── */
@@ -73,5 +75,5 @@ export function getClassesBySubpackage(module, subpackage) {
   )
 }
 
-export { devtoolsData, annotationData, cloudData, coreData, dslData, exportData, ketoyData, modelData, navigationData, parserData, registryData, rendererData, screenData, themeData, utilData, widgetData }
+export { devtoolsData, annotationData, cloudData, coreData, dslData, exportData, ketoyData, modelData, navigationData, parserData, registryData, rendererData, screenData, themeData, utilData, widgetData, wireData }
 export default referenceData

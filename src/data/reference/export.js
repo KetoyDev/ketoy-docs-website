@@ -14,7 +14,7 @@ const exportData = {
     subpackage: 'registry',
     category: 'Export',
     subcategory: 'Export Registry',
-    description: 'Central registry for all screen export definitions. Screen files register their export configuration here via ketoyExport(), and the export runner (KetoyAutoExportRunner) reads them to produce JSON files — no manual test classes or boilerplate needed.',
+    description: 'Central registry for all screen export definitions. Screen files register their export configuration here via ketoyExport(), and the export runner (KetoyAutoExportRunner) reads them to produce .ktw wire files — no manual test classes or boilerplate needed.',
     android: {
       packageName: 'com.developerstring.ketoy.export',
       annotations: [],
@@ -59,7 +59,7 @@ val navGraphs = KetoyExportRegistry.navGraphs`,
     subpackage: 'runner',
     category: 'Export',
     subcategory: 'Export Runner',
-    description: 'Automatic export runner that reads all registered screen exports from KetoyExportRegistry and writes JSON files to disk. Replaces the manual ExportScreensTest, ProductionExportTest, and KetoyProductionExport patterns with a fully automatic flow.',
+    description: 'Automatic export runner that reads all registered screen exports from KetoyExportRegistry and writes .ktw wire files to disk (10× smaller than equivalent JSON). Replaces the manual ExportScreensTest, ProductionExportTest, and KetoyProductionExport patterns with a fully automatic flow.',
     android: {
       packageName: 'com.developerstring.ketoy.export',
       annotations: [],
@@ -76,7 +76,7 @@ val navGraphs = KetoyExportRegistry.navGraphs`,
 }`,
     },
     methods: [
-      { name: 'exportAll(outputDir, clearExisting?, writeManifests?)', returns: 'ExportResult', description: 'Export all registered screens and nav graphs to the given directory. Creates the directory if needed. clearExisting removes old .json files before writing. writeManifests generates navigation_manifest.json and screen_manifest.json.' },
+      { name: 'exportAll(outputDir, clearExisting?, writeManifests?)', returns: 'ExportResult', description: 'Export all registered screens and nav graphs to the given directory. Creates the directory if needed. clearExisting removes old .ktw wire files before writing. writeManifests generates navigation_manifest.json and screen_manifest.json (JSON index files).' },
     ],
     usage: `// In KetoyAutoExportTest:
 class KetoyAutoExportTest {
@@ -107,7 +107,7 @@ class KetoyAutoExportTest {
         println(result)
     }
 }`,
-    notes: 'Run via Gradle: ./gradlew ketoyExport (dev server) or ./gradlew ketoyExportProd (production). Both tasks run KetoyAutoExportTest with different output directories.',
+    notes: 'Run via Gradle: ./gradlew ketoyExport (dev server) or ./gradlew ketoyExportProd (production). Both tasks compile K-DSL to .ktw wire files. Nav graphs remain in JSON format for compatibility.',
     seeAlso: ['KetoyExportRegistry', 'ketoyExport', 'ExportResult', 'ScreenExportDefinition'],
   },
 

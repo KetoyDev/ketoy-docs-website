@@ -7,7 +7,7 @@
 const testingLocallyDoc = {
   id: 'testing-locally',
   title: 'Testing Locally',
-  description: 'Set up the full local development loop — export your Kotlin DSL screens to JSON, launch the Ketoy Dev Server, connect your app with KetoyDevWrapper, and see changes live on your device or emulator in under a second.',
+  description: 'Set up the full local development loop — export your Kotlin DSL screens to .ktw wire format, launch the Ketoy Dev Server, connect your app with KetoyDevWrapper, and see changes live on your device or emulator in under a second.',
   icon: 'FaFlask',
   order: 5,
   sections: [
@@ -24,9 +24,9 @@ SourceWatcher detects the change
        ↓
 Runs \`gradlew ketoyExport\` (auto)
        ↓
-ketoy-screens/ JSON files are regenerated
+ketoy-screens/ .ktw wire files are regenerated
        ↓
-FileWatcher detects the new JSON
+FileWatcher detects the new .ktw file
        ↓
 KetoyDevServer pushes via WebSocket
        ↓
@@ -37,7 +37,7 @@ Android app recomposes the UI instantly
 
 | Module | Type | Purpose |
 |---|---|---|
-| **ketoy-sdk** | Android library | Core SDK with devtools, JSON renderer, DSL, and export system |
+| **ketoy-sdk** | Android library | Core SDK with devtools, wire format renderer, DSL, and export system |
 | **ketoy-gradle-plugin** | Gradle plugin | Ketoy tasks (\`ketoyExport\`, \`ketoyServe\`, \`ketoyDev\`) |
 
 > **Note:** As of 0.1-beta.1, devtools are integrated directly into \`ketoy-sdk\`. No separate \`ketoy-devtools\` module is required.
@@ -46,9 +46,9 @@ Android app recomposes the UI instantly
 
 | Task | Command | What it does |
 |---|---|---|
-| \`ketoyExport\` | \`./gradlew ketoyExport\` | Run \`KetoyAutoExportTest\` → write JSON to \`ketoy-screens/\` |
-| \`ketoyExportProd\` | \`./gradlew ketoyExportProd\` | Export for production → write JSON to \`ketoy-export/\` with manifests |
-| \`ketoyServe\` | \`./gradlew ketoyServe\` | Start the dev server (watches \`ketoy-screens/\` for JSON changes) |
+| \`ketoyExport\` | \`./gradlew ketoyExport\` | Run \`KetoyAutoExportTest\` → write \`.ktw\` wire files to \`ketoy-screens/\` |
+| \`ketoyExportProd\` | \`./gradlew ketoyExportProd\` | Export for production → write \`.ktw\` wire files to \`ketoy-export/\` with manifests |
+| \`ketoyServe\` | \`./gradlew ketoyServe\` | Start the dev server (watches \`ketoy-screens/\` for \`.ktw\` wire file changes) |
 | \`ketoyDev\` | \`./gradlew ketoyDev\` | Start dev server **with** auto-export (recommended — single command) |`,
     },
 
@@ -135,14 +135,27 @@ val demoNavExport = ketoyNavExport(AppNavGraphs.demo)`,
         {
           id: 'kdata-templates',
           title: 'KData Template Variables',
-          content: `Use \`KData\` to insert template placeholders that resolve at runtime:
+          content: `Use \`KData\` to insert type-safe template placeholders that resolve at runtime. All methods return a String template — the typed suffix documents the expected resolved type:
 
-| Method | Template Output | Description |
-|---|---|---|
-| \`KData.user("key")\` | \`{{data:user:key}}\` | User-provided data from \`KetoyContent(data = ...)\` |
-| \`KData.ref("refId")\` | \`{{data:ref:refId}}\` | Reference to shared/global data |
+| Method | Template Output | Resolved Type | Description |
+|---|---|---|---|
+| \`KData.user("key")\` | \`{{data:user:key}}\` | String | User data from \`KetoyContent(data = ...)\` |
+| \`KData.userInt("key")\` | \`{{data:user:key}}\` | Int | Integer user field — resolve with \`KetoyVariableRegistry.resolveInt()\` |
+| \`KData.userBool("key")\` | \`{{data:user:key}}\` | Boolean | Boolean user field — resolve with \`KetoyVariableRegistry.resolveBoolean()\` |
+| \`KData.userFloat("key")\` | \`{{data:user:key}}\` | Float | Float user field — resolve with \`KetoyVariableRegistry.resolveFloat()\` |
+| \`KData.userDouble("key")\` | \`{{data:user:key}}\` | Double | Double user field — resolve with \`KetoyVariableRegistry.resolveDouble()\` |
+| \`KData.userLong("key")\` | \`{{data:user:key}}\` | Long | Long user field — resolve with \`KetoyVariableRegistry.resolveLong()\` |
+| \`KData.analytics("key")\` | \`{{data:analytics:key}}\` | String | Analytics screen data |
+| \`KData.analyticsInt("key")\` | \`{{data:analytics:key}}\` | Int | Integer analytics field |
+| \`KData.analyticsBool("key")\` | \`{{data:analytics:key}}\` | Boolean | Boolean analytics field |
+| \`KData.ref("prefix", "key")\` | \`{{data:prefix:key}}\` | String | Generic reference for any custom scope |
+| \`KData.intRef("prefix", "key")\` | \`{{data:prefix:key}}\` | Int | Generic integer reference |
+| \`KData.boolRef("prefix", "key")\` | \`{{data:prefix:key}}\` | Boolean | Generic boolean reference |
+| \`KData.floatRef("prefix", "key")\` | \`{{data:prefix:key}}\` | Float | Generic float reference |
+| \`KData.doubleRef("prefix", "key")\` | \`{{data:prefix:key}}\` | Double | Generic double reference |
+| \`KData.longRef("prefix", "key")\` | \`{{data:prefix:key}}\` | Long | Generic long reference |
 
-At runtime, the SDK replaces these placeholders with actual values from the \`data\` map.`,
+At runtime, the SDK replaces these placeholders with actual values. For DSL parameters that accept \`Any\`, resolve the value with the matching \`KetoyVariableRegistry.resolveXxx()\` call.`,
         },
       ],
     },
@@ -238,7 +251,7 @@ class KetoyAutoExportTest {
 1. **Screen files** register via \`ketoyExport(...)\` — self-registering on class-load
 2. **Nav graphs** register via \`ketoyNavExport(...)\`
 3. **AppExports** references all export vals to trigger class-loading
-4. **The runner** iterates the registry and writes JSON files
+4. **The runner** iterates the registry and writes \`.ktw\` wire files
 
 No manual screen listings, no builder duplication, no keeping test code in sync with screen code.`,
         },
@@ -249,7 +262,7 @@ No manual screen listings, no builder duplication, no keeping test code in sync 
     {
       id: 'run-export',
       title: 'Step 4 — Run the Export',
-      content: `Use the \`ketoyExport\` Gradle task to run \`KetoyAutoExportTest\` and generate JSON files:`,
+      content: `Use the \`ketoyExport\` Gradle task to run \`KetoyAutoExportTest\` and compile screens to \`.ktw\` wire files:`,
       code: `./gradlew ketoyExport`,
       language: 'bash',
       subsections: [
@@ -260,12 +273,12 @@ No manual screen listings, no builder duplication, no keeping test code in sync 
 
 \`\`\`
 ketoy-screens/
-├── home.json               # Screen JSONs (one per screen)
-├── profile.json
-├── analytics.json
-├── cards.json
-├── history_screen.json
-├── nav_main.json            # Navigation graph JSONs
+├── home.ktw               # Screen wire files (one per screen)
+├── profile.ktw
+├── analytics.ktw
+├── cards.ktw
+├── history_screen.ktw
+├── nav_main.json          # Navigation graph JSONs (remain JSON)
 └── nav_demo.json
 \`\`\`
 
@@ -302,11 +315,11 @@ Both tasks run \`KetoyAutoExportTest\` — the difference is just the output dir
       id: 'dev-server',
       title: 'Step 5 — Start the Dev Server',
       content: `The Ketoy Dev Server is a JVM application that serves screen JSON over HTTP and pushes live updates via WebSocket. Two ways to start it:`,
-      code: `# Option A: JSON-only watching (manually run ketoyExport when DSL changes)
+      code: `# Option A: Wire-file watching (manually run ketoyExport when DSL changes)
 ./gradlew ketoyServe
 
 # Option B: Full live-reload (RECOMMENDED — single command)
-# Watches Kotlin source files, auto-exports JSON, pushes to app
+# Watches Kotlin source files, auto-exports .ktw, pushes to app
 ./gradlew ketoyDev`,
       language: 'bash',
       subsections: [
@@ -345,8 +358,8 @@ Both tasks run \`KetoyAutoExportTest\` — the difference is just the output dir
             headers: ['Flag', 'Short', 'Default', 'Description'],
             rows: [
               ['--port', '-p', '8484', 'HTTP server port. WebSocket runs on port + 1 (8485).'],
-              ['--watch', '-w', './ketoy-screens', 'Directory to watch for JSON files.'],
-              ['--auto-export', '-a', 'false', 'Watch Kotlin sources and auto-rebuild JSON on change.'],
+              ['--watch', '-w', './ketoy-screens', 'Directory to watch for .ktw wire files.'],
+              ['--auto-export', '-a', 'false', 'Watch Kotlin sources and auto-rebuild .ktw wire files on change.'],
               ['--project', '—', '.', 'Gradle project root (for locating gradlew).'],
               ['--source', '-s', 'app/src/main/java', 'Source dir to watch (repeatable).'],
               ['--debounce', '—', '1500', 'Milliseconds to wait after last source change before exporting.'],
@@ -362,10 +375,10 @@ Both tasks run \`KetoyAutoExportTest\` — the difference is just the output dir
               ['GET /', 'HTML dashboard with status, screens, and API docs.'],
               ['GET /status', 'JSON health check (version, screen count, connected clients).'],
               ['GET /screens', 'List available screen names.'],
-              ['GET /screen?name=X', 'Fetch a single screen\'s JSON.'],
+              ['GET /screen?name=X', 'Fetch a single screen\'s .ktw wire bytes.'],
               ['GET /navs', 'List available navigation graph names.'],
-              ['GET /nav?name=X', 'Fetch a single nav graph\'s JSON.'],
-              ['GET /bundle', 'Full payload — all screens + all nav graphs.'],
+              ['GET /nav?name=X', 'Fetch a single nav graph\'s JSON (nav graphs remain JSON format).'],
+              ['GET /bundle', 'Full payload — all screen .ktw wire bytes + all nav graph JSONs.'],
               ['GET /poll?v=N', 'Long-poll — returns immediately if server version > N, else waits 30s.'],
               ['WS :port+1', 'WebSocket for real-time push updates.'],
             ],
@@ -418,10 +431,10 @@ Both tasks run \`KetoyAutoExportTest\` — the difference is just the output dir
           content: `When the wrapper connects to the dev server:
 
 1. **KetoyDevClient** opens a WebSocket to \`port + 1\` (falls back to HTTP polling if WebSocket is unavailable).
-2. The server sends an initial **bundle** with all screen + nav graph JSON payloads.
-3. For each incoming screen JSON, the wrapper matches the screen name against \`KetoyScreenRegistry\` and calls \`setScreenDevOverride(json)\` — injecting the new JSON.
+2. The server sends an initial **bundle** with all screen \`.ktw\` wire payloads + nav graph JSONs.
+3. For each incoming screen payload, the wrapper matches the screen name against \`KetoyScreenRegistry\`, auto-decodes the wire bytes, and calls \`setScreenDevOverride()\` — injecting the new UI.
 4. For each incoming nav graph JSON (\`nav_*.json\`), the wrapper parses it into a \`KetoyNavGraph\` and sets it in \`KetoyNavDevOverrides\`.
-5. The matching \`KetoyContent\` blocks **recompose instantly** with the new JSON.
+5. The matching \`KetoyContent\` blocks **recompose instantly** with the new wire payload.
 6. On disconnect, all dev-overrides are cleared — the app restores to its normal state.`,
         },
       ],
@@ -496,8 +509,8 @@ val state by client.connectionState                        // ConnectionState`,
               ['destroy()', 'Unit', 'Full teardown — disconnect, cancel scope, shutdown HTTP client. Cannot reuse.'],
               ['isConnected()', 'Boolean', 'Whether the client is currently connected.'],
               ['connectionState', 'State<ConnectionState>', 'Observable connection state.'],
-              ['screens', 'SnapshotStateMap<String, String>', 'All screen JSON payloads from the server.'],
-              ['navGraphs', 'SnapshotStateMap<String, String>', 'All nav graph JSON payloads from the server.'],
+              ['screens', 'SnapshotStateMap<String, String>', 'All screen payloads from the server (wire bytes as Base64 string or raw JSON).'],
+              ['navGraphs', 'SnapshotStateMap<String, String>', 'All nav graph JSON payloads from the server (nav graphs remain JSON format).'],
               ['dataVersion', 'State<Long>', 'Monotonically increasing version counter from the server.'],
               ['activeScreen', 'MutableState<String?>', 'Currently focused screen for preview mode.'],
               ['serverInfo', 'State<ServerInfo?>', 'Server metadata (version, screen count, client count).'],
@@ -615,21 +628,21 @@ KetoyDevActivity.launch(context, host = "192.168.1.5", port = 8484)`,
       content: `The Ketoy Dev Server consists of three cooperating components:
 
 ### FileWatcher
-Monitors the \`ketoy-screens/\` directory for JSON file changes:
-- \`*.json\` (not \`nav_*\`) → screen definition → \`broadcastUpdate()\`
-- \`nav_*.json\` → navigation graph → \`broadcastNavUpdate()\`
+Monitors the \`ketoy-screens/\` directory for wire file changes:
+- \`*.ktw\` → screen wire payload → \`broadcastUpdate()\`
+- \`nav_*.json\` → navigation graph (JSON format) → \`broadcastNavUpdate()\`
 
 ### SourceWatcher (auto-export only)
 Monitors Kotlin source directories for \`.kt\` / \`.kts\` changes:
 - Debounces rapid edits (default 1.5s)
-- Runs \`gradlew ketoyExport --quiet\` to regenerate JSON
+- Runs \`gradlew ketoyExport --quiet\` to regenerate \`.ktw\` wire files
 - Re-entrancy protected: only one export runs at a time
 
 ### ScreenManager
-In-memory cache for all screen + nav graph JSON:
+In-memory cache for all screen wire payloads + nav graph JSON:
 - Thread-safe (\`ConcurrentHashMap\` + \`AtomicLong\` version counter)
-- Deduplicates unchanged content (skips broadcast if JSON is identical)
-- File conventions: \`home.json\` → screen "home", \`nav_main.json\` → nav "main"
+- Deduplicates unchanged content (skips broadcast if payload is identical)
+- File conventions: \`home.ktw\` → screen "home", \`nav_main.json\` → nav "main"
 
 \`\`\`
 FileWatcher / SourceWatcher
@@ -704,11 +717,11 @@ The \`KetoyDevConnectScreen\` automatically detects emulators and pre-fills \`10
 
 **Keep \`AppExports\` up to date** — When adding a new screen, don't forget to reference its export val in \`AppExports.init {}\`.
 
-**Don't commit \`ketoy-screens/\`** — The directory contains generated JSON. Add it to \`.gitignore\`. Regenerate it with \`./gradlew ketoyExport\`.
+**Don't commit \`ketoy-screens/\`** — The directory contains generated \`.ktw\` wire files. Add it to \`.gitignore\`. Regenerate it with \`./gradlew ketoyExport\`.
 
 **Wrap devtools in DEBUG check** — Use \`KetoyDevWrapper\` only in debug builds. It's available in the SDK but should be guarded with \`BuildConfig.DEBUG\`.
 
-**Export after DSL changes** — If not using \`ketoyDev\` (auto-export), remember to run \`./gradlew ketoyExport\` after editing your DSL builders.`,
+**Export after DSL changes** — If not using \`ketoyDev\` (auto-export), remember to run \`./gradlew ketoyExport\` after editing your DSL builders to regenerate \`.ktw\` wire files.`,
     },
   ],
   nextDoc: 'production-release',

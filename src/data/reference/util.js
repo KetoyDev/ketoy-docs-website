@@ -1714,6 +1714,98 @@ box(shape = shape)`,
     seeAlso: ['KShapes', 'kRounded', 'kCircle'],
   },
 
+  KData: {
+    name: 'KData',
+    kind: 'object',
+    module: 'util',
+    subpackage: 'data',
+    category: 'Util',
+    subcategory: 'Data Templates',
+    description: 'Type-safe data-template builder for the Ketoy SDUI variable system. Instead of writing raw template strings like `"{{data:user:name}}"`, use KData to get compile-time safety and IDE auto-completion. All methods return a String template — the typed suffix (Int, Bool, Float, etc.) documents the expected resolved type and pairs with KetoyVariableRegistry.resolveXxx().',
+    android: {
+      packageName: 'com.developerstring.ketoy.util',
+      annotations: [],
+      imports: [],
+      sourceCode: `object KData {
+
+    // ── Generic ref ──────────────────────────────────────────
+    fun ref(prefix: String, field: String): String = "{{data:${'$'}prefix:${'$'}field}}"
+
+    // ── String templates ─────────────────────────────────────
+    fun user(field: String): String = ref("user", field)
+    fun analytics(field: String): String = ref("analytics", field)
+
+    // ── Typed user helpers ───────────────────────────────────
+    fun userInt(field: String): String = user(field)
+    fun userBool(field: String): String = user(field)
+    fun userFloat(field: String): String = user(field)
+    fun userDouble(field: String): String = user(field)
+    fun userLong(field: String): String = user(field)
+
+    // ── Typed analytics helpers ──────────────────────────────
+    fun analyticsInt(field: String): String = analytics(field)
+    fun analyticsBool(field: String): String = analytics(field)
+    fun analyticsFloat(field: String): String = analytics(field)
+    fun analyticsDouble(field: String): String = analytics(field)
+
+    // ── Typed generic ref helpers ────────────────────────────
+    fun intRef(prefix: String, field: String): String = ref(prefix, field)
+    fun boolRef(prefix: String, field: String): String = ref(prefix, field)
+    fun floatRef(prefix: String, field: String): String = ref(prefix, field)
+    fun doubleRef(prefix: String, field: String): String = ref(prefix, field)
+    fun longRef(prefix: String, field: String): String = ref(prefix, field)
+}`,
+    },
+    methods: [
+      { name: 'ref(prefix, field)', returns: 'String', description: 'Builds a {{data:prefix:field}} template string for any custom scope. E.g. KData.ref("cart", "total") → "{{data:cart:total}}".' },
+      { name: 'user(field)', returns: 'String', description: 'Builds a {{data:user:field}} template (resolved as String).' },
+      { name: 'analytics(field)', returns: 'String', description: 'Builds a {{data:analytics:field}} template (resolved as String).' },
+      { name: 'userInt(field)', returns: 'String', description: 'Template for an Int field in the user scope. Resolve at runtime with KetoyVariableRegistry.resolveInt(value).' },
+      { name: 'userBool(field)', returns: 'String', description: 'Template for a Boolean field in the user scope. Resolve with KetoyVariableRegistry.resolveBoolean(value).' },
+      { name: 'userFloat(field)', returns: 'String', description: 'Template for a Float field in the user scope. Resolve with KetoyVariableRegistry.resolveFloat(value).' },
+      { name: 'userDouble(field)', returns: 'String', description: 'Template for a Double field in the user scope. Resolve with KetoyVariableRegistry.resolveDouble(value).' },
+      { name: 'userLong(field)', returns: 'String', description: 'Template for a Long field in the user scope. Resolve with KetoyVariableRegistry.resolveLong(value).' },
+      { name: 'analyticsInt(field)', returns: 'String', description: 'Template for an Int field in the analytics scope.' },
+      { name: 'analyticsBool(field)', returns: 'String', description: 'Template for a Boolean field in the analytics scope.' },
+      { name: 'analyticsFloat(field)', returns: 'String', description: 'Template for a Float field in the analytics scope.' },
+      { name: 'analyticsDouble(field)', returns: 'String', description: 'Template for a Double field in the analytics scope.' },
+      { name: 'intRef(prefix, field)', returns: 'String', description: 'Generic Int reference template for a custom scope. Resolve with KetoyVariableRegistry.resolveInt(value).' },
+      { name: 'boolRef(prefix, field)', returns: 'String', description: 'Generic Boolean reference template for a custom scope. Resolve with KetoyVariableRegistry.resolveBoolean(value).' },
+      { name: 'floatRef(prefix, field)', returns: 'String', description: 'Generic Float reference template for a custom scope. Resolve with KetoyVariableRegistry.resolveFloat(value).' },
+      { name: 'doubleRef(prefix, field)', returns: 'String', description: 'Generic Double reference template for a custom scope. Resolve with KetoyVariableRegistry.resolveDouble(value).' },
+      { name: 'longRef(prefix, field)', returns: 'String', description: 'Generic Long reference template for a custom scope. Resolve with KetoyVariableRegistry.resolveLong(value).' },
+    ],
+    usage: `// String templates (recommended for display values)
+KText(text = KData.user("name"))          // → "{{data:user:name}}"
+KText(text = KData.user("totalBalance"))  // → "{{data:user:totalBalance}}"
+KText(text = KData.analytics("income"))   // → "{{data:analytics:income}}"
+
+// Typed helpers for non-String DSL parameters
+fun buildScreen(
+    selectedIndex: Any = 0,
+    isVisible: Any = true,
+    progress: Any = 0f
+) = ketoyRoot { /* ... */ }
+
+// Export with templates:
+buildScreen(
+    selectedIndex = KData.userInt("tabIndex"),
+    isVisible = KData.userBool("showBanner"),
+    progress = KData.userFloat("uploadProgress")
+)
+
+// Runtime: resolve typed value
+val index = KetoyVariableRegistry.resolveInt(selectedIndex)
+val visible = KetoyVariableRegistry.resolveBoolean(isVisible)
+
+// Generic scope for custom data
+KData.ref("cart", "itemCount")            // → "{{data:cart:itemCount}}"
+KData.intRef("cart", "itemCount")         // same template, documents Int type
+KData.ref("product", "price")            // → "{{data:product:price}}"`,
+    notes: 'All KData methods are identical at runtime — they all return a {{data:prefix:field}} string. The typed suffix (Int, Bool, etc.) is purely documentation for the developer and pairs with KetoyVariableRegistry.resolveXxx() at the call site. Templates are always serialised as strings in wire format; the renderer resolves them at render time.',
+    seeAlso: ['KetoyVariableRegistry', 'KetoyContent', 'ketoyExport'],
+  },
+
 }
 
 export default utilData

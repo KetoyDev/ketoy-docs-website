@@ -101,6 +101,7 @@ const navigation = [
         label: 'screen',
         children: [
           { label: 'KetoyCloudScreen', path: '/reference/KetoyCloudScreen' },
+          { label: 'KetoyCloudScreenFromWireBytes', path: '/reference/KetoyCloudScreenFromWireBytes' },
           { label: 'KetoyCloudScreenFromJson', path: '/reference/KetoyCloudScreenFromJson' },
           { label: 'CloudScreenState', path: '/reference/CloudScreenState' },
         ],
@@ -504,6 +505,7 @@ const navigation = [
         label: 'core',
         children: [
           { label: 'UIComponent', path: '/reference/UIComponent' },
+          { label: 'JSONBytesToUI', path: '/reference/JSONBytesToUI' },
           { label: 'JSONStringToUI', path: '/reference/JSONStringToUI' },
           { label: 'RenderComponent', path: '/reference/RenderComponent' },
           { label: 'RenderContentSlotFromJson', path: '/reference/RenderContentSlotFromJson' },
@@ -724,6 +726,47 @@ const navigation = [
         label: 'loader',
         children: [
           { label: 'KetoyProductionNavLoader', path: '/reference/KetoyProductionNavLoader' },
+        ],
+      },
+    ],
+  },
+  {
+    type: 'section',
+    label: 'wire',
+    children: [
+      {
+        type: 'section',
+        label: 'format',
+        children: [
+          { label: 'KetoyWireFormat', path: '/reference/KetoyWireFormat' },
+          { label: 'WireFormatConfig', path: '/reference/WireFormatConfig' },
+          { label: 'BinaryEncoding', path: '/reference/BinaryEncoding' },
+          { label: 'CompressionStats', path: '/reference/CompressionStats' },
+        ],
+      },
+      {
+        type: 'section',
+        label: 'encoding',
+        children: [
+          { label: 'KetoyMessagePack', path: '/reference/KetoyMessagePack' },
+          { label: 'KetoyCompression', path: '/reference/KetoyCompression' },
+        ],
+      },
+      {
+        type: 'section',
+        label: 'aliases',
+        children: [
+          { label: 'KetoyKeyAlias', path: '/reference/KetoyKeyAlias' },
+          { label: 'KetoyComponentTypeId', path: '/reference/KetoyComponentTypeId' },
+        ],
+      },
+      {
+        type: 'section',
+        label: 'patch',
+        children: [
+          { label: 'KetoyPatch', path: '/reference/KetoyPatch' },
+          { label: 'PatchOp', path: '/reference/PatchOp' },
+          { label: 'PatchException', path: '/reference/PatchException' },
         ],
       },
     ],

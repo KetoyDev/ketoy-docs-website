@@ -8,7 +8,7 @@
 const quickStartDoc = {
   id: 'quick-start',
   title: 'Quick Start',
-  description: 'Get a working Ketoy screen running in under 10 minutes - plugin setup, SDK initialization, building your first SDUI screen, exporting it to JSON, and launching the live dev server.',
+  description: 'Get a working Ketoy screen running in under 10 minutes - plugin setup, SDK initialization, building your first SDUI screen, exporting it to .ktw wire format, and launching the live dev server.',
   icon: 'FaBolt',
   order: 0,
   sections: [
@@ -20,7 +20,7 @@ const quickStartDoc = {
 - The Ketoy SDK and Gradle plugin wired into your project
 - \`Ketoy.initialize()\` called at app startup
 - A screen built using the Kotlin DSL
-- That screen exported to JSON for the dev server
+- That screen exported to .ktw wire format for the dev server
 - Live hot-reload running on your device or emulator
 
 **What you need:** Android Studio, an existing Android project, Kotlin DSL build files (\`build.gradle.kts\`).`,
@@ -48,7 +48,7 @@ pluginManagement {
           content: 'Add the plugin block to your **root** `build.gradle.kts`. The plugin registers all `ketoy*` Gradle tasks (`ketoyExport`, `ketoyDev`, `ketoyPush`, etc.).',
           code: `// root build.gradle.kts
 plugins {
-    id("dev.ketoy.devtools") version "0.1.5-beta.10" apply false
+    id("dev.ketoy.devtools") version "0.1.6-beta" apply false
 }`,
           language: 'kotlin',
           codeTitle: 'build.gradle.kts (root)',
@@ -66,7 +66,7 @@ plugins {
 }
 
 dependencies {
-    implementation("dev.ketoy:sdk:0.1.3-beta.2")
+    implementation("dev.ketoy:sdk:0.1.4-beta")
 }`,
           language: 'kotlin',
           codeTitle: 'app/build.gradle.kts',
@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
     {
       id: 'dev-wrapper',
       title: 'Step 3 - Wrap with KetoyDevWrapper',
-      content: `\`KetoyDevWrapper\` connects your running app to the local Ketoy dev server. When you edit a DSL screen and the JSON is regenerated, the wrapper receives the update over WebSocket and re-renders the affected screen - no recompile needed.
+      content: `\`KetoyDevWrapper\` connects your running app to the local Ketoy dev server. When you edit a DSL screen and the .ktw wire file is regenerated, the wrapper receives the update over WebSocket and re-renders the affected screen - no recompile needed.
 
 **Place it at the root of your composable tree**, outside everything else. It can wrap your entire navigation graph, ViewModels, theme providers - anything. It's transparent at runtime (a no-op unless a dev server connection is active). **It is recomemded to remove it from production builds**`,
       code: `setContent {
@@ -196,7 +196,7 @@ class MainActivity : ComponentActivity() {
 1. **\`ProvideKetoyScreen\`** - a composable that declares a named screen context. All child \`KetoyContent\` blocks belong to this screen.
 2. **\`KetoyContent\`** - renders one DSL content block. A single screen can have multiple named content blocks interleaved with native Compose code.
 
-The UI itself is built with the **Ketoy Kotlin DSL** - a set of builder functions (\`KColumn\`, \`KText\`, \`KSpacer\`, etc.) that produce a \`KNode\` tree. This tree gets serialized to JSON for the dev server and production export.`,
+The UI itself is built with the **Ketoy Kotlin DSL** - a set of builder functions (\`KColumn\`, \`KText\`, \`KSpacer\`, etc.) that produce a \`KNode\` tree. This tree is serialized to the .ktw wire format — **10x smaller than raw JSON** — for the dev server and production export.`,
       code: `@Composable
 fun HomeScreen() {
     ProvideKetoyScreen(screenName = "home") {
@@ -263,7 +263,7 @@ fun HomeScreen() {
     {
       id: 'export-declaration',
       title: 'Step 5 - Declare the Export',
-      content: `The \`ketoyExport()\` DSL function declares which screen content blocks should be written to JSON. Place it **in the same file as the screen**, just below the DSL builder. It self-registers with \`KetoyExportRegistry\` on class-load - no manual registration needed.
+      content: `The \`ketoyExport()\` DSL function declares which screen content blocks should be compiled to .ktw wire files. Place it **in the same file as the screen**, just below the DSL builder. It self-registers with \`KetoyExportRegistry\` on class-load - no manual registration needed.
 
 The \`content(name)\` block inside it must match the \`name\` parameter used in \`KetoyContent\`. The builder lambda calls the same DSL function the composable uses, ensuring export and runtime stay in sync.`,
       code: `val homeExport = ketoyExport("home", displayName = "Home") {
@@ -353,8 +353,8 @@ class KetoyAutoExportTest {
           table: {
             headers: ['Method', 'Output dir', 'writeManifests', 'Purpose'],
             rows: [
-              ['`exportForDevServer()`', '`ketoy-screens/`', '`false`', 'Writes screen JSON for the live dev server. Manifests not needed - the server reads JSON files directly.'],
-              ['`exportForProduction()`', '`ketoy-export/`', '`true`', 'Writes screen JSON **and** `screen_manifest.json` + `navigation_manifest.json` for production loading via `KetoyProductionNavLoader`.'],
+              ['`exportForDevServer()`', '`ketoy-screens/`', '`false`', 'Compiles screens to `.ktw` wire files for the live dev server. Manifests not needed - the server reads `.ktw` files directly.'],
+              ['`exportForProduction()`', '`ketoy-export/`', '`true`', 'Compiles screens to `.ktw` wire files **and** generates `screen_manifest.json` + `navigation_manifest.json` for production loading via `KetoyProductionNavLoader`.'],
             ],
           },
         },
@@ -367,8 +367,8 @@ class KetoyAutoExportTest {
       subsections: [
         {
           id: 'run-export',
-          title: 'Export screens to JSON',
-          content: 'Run the export task to generate JSON from your DSL screens. This runs the `KetoyAutoExportTest.exportForDevServer()` method under the hood.',
+          title: 'Export screens to .ktw wire format',
+          content: 'Run the export task to compile your DSL screens to `.ktw` wire files. This runs the `KetoyAutoExportTest.exportForDevServer()` method under the hood.',
           code: `./gradlew ketoyExport`,
           language: 'bash',
           codeTitle: 'Terminal',
@@ -376,7 +376,7 @@ class KetoyAutoExportTest {
         {
           id: 'run-dev-server',
           title: 'Start the dev server with live reload',
-          content: '`ketoyDev` starts the HTTP + WebSocket server **and** watches your Kotlin source files for changes. When you edit a DSL screen, it auto-runs `ketoyExport`, detects the updated JSON (100ms debounce), and broadcasts the new UI to your connected app instantly.',
+          content: '`ketoyDev` starts the HTTP + WebSocket server **and** watches your Kotlin source files for changes. When you edit a DSL screen, it auto-runs `ketoyExport`, detects the updated `.ktw` wire file (100ms debounce), and broadcasts the compressed binary to your connected app instantly.',
           code: `./gradlew ketoyDev`,
           language: 'bash',
           codeTitle: 'Terminal',
@@ -384,7 +384,7 @@ class KetoyAutoExportTest {
         {
           id: 'run-prod-export',
           title: 'Export for production',
-          content: 'When you\'re ready to ship, run the production export. This generates both the screen JSON files **and** the manifests required by `KetoyProductionNavLoader`.',
+          content: 'When you\'re ready to ship, run the production export. This compiles all screens to `.ktw` wire files **and** generates the manifests required by `KetoyProductionNavLoader`.',
           code: `./gradlew ketoyExportProd`,
           language: 'bash',
           codeTitle: 'Terminal',
@@ -396,9 +396,9 @@ class KetoyAutoExportTest {
           table: {
             headers: ['Task', 'What it does', 'When to use'],
             rows: [
-              ['`./gradlew ketoyExport`', 'Runs `exportForDevServer()` → writes to `ketoy-screens/`', 'Once before starting `ketoyDev`, or after adding a new screen'],
-              ['`./gradlew ketoyDev`', 'Starts dev server + source watcher → auto-export + hot-reload', 'During active development'],
-              ['`./gradlew ketoyExportProd`', 'Runs `exportForProduction()` → writes to `ketoy-export/` with manifests', 'Before committing or releasing'],
+              ['`./gradlew ketoyExport`', 'Runs `exportForDevServer()` → compiles to `.ktw` in `ketoy-screens/`', 'Once before starting `ketoyDev`, or after adding a new screen'],
+              ['`./gradlew ketoyDev`', 'Starts dev server + source watcher → auto-export `.ktw` + hot-reload', 'During active development'],
+              ['`./gradlew ketoyExportProd`', 'Runs `exportForProduction()` → compiles `.ktw` to `ketoy-export/` with manifests', 'Before committing or releasing'],
               ['`./gradlew ketoyPushAll`', 'Pushes exported screens to Ketoy cloud API', 'When deploying to production (requires API key)'],
             ],
           },

@@ -19,16 +19,16 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
 
 | Build System | Config File | Latest Version |
 |---|---|---|
-| Kotlin DSL | \`build.gradle.kts\` | \`0.1.3-beta.2\` |
-| Groovy DSL | \`build.gradle\` | \`0.1.3-beta.2\` |
-| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1.3-beta.2\` |`,
+| Kotlin DSL | \`build.gradle.kts\` | \`0.1.6-beta\` |
+| Groovy DSL | \`build.gradle\` | \`0.1.6-beta\` |
+| Version Catalog (TOML) | \`libs.versions.toml\` | \`0.1.6-beta\` |`,
       subsections: [
         {
           id: 'install-kotlin-dsl',
           title: 'Kotlin DSL',
           content: 'Add the dependency in your module-level `build.gradle.kts`:',
           code: `dependencies {
-        implementation("dev.ketoy:sdk:0.1.3-beta.2")
+        implementation("dev.ketoy:sdk:0.1.6-beta")
 }`,
           language: 'kotlin',
           codeTitle: 'build.gradle.kts',
@@ -38,7 +38,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Groovy DSL',
           content: 'Add the dependency in your module-level `build.gradle`:',
           code: `dependencies {
-        implementation 'dev.ketoy:sdk:0.1.3-beta.2'
+        implementation 'dev.ketoy:sdk:0.1.6-beta'
 }`,
           language: 'groovy',
           codeTitle: 'build.gradle',
@@ -48,7 +48,7 @@ The artifact coordinates are: **group** \`dev.ketoy\`, **name** \`sdk\`.
           title: 'Version Catalog (TOML)',
           content: 'If you use a Gradle version catalog, declare the version and library in `libs.versions.toml`:',
           code: `[versions]
-ketoy = "0.1.3-beta.2"
+ketoy = "0.1.6-beta"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`,
@@ -98,18 +98,19 @@ pluginManagement {
 
 // root build.gradle.kts
 plugins {
-  id("dev.ketoy.devtools") version "0.1.5-beta.10"
+  id("dev.ketoy.devtools") version "0.1.6-beta"
 }`,
       language: 'kotlin',
     },
     {
       id: 'basic-setup',
       title: 'Basic Setup',
-      content: 'The simplest way to get started — local-only mode without cloud features. This initializes the core registries and built-in parsers.',
+      content: 'The simplest way to get started — local-only mode without cloud features. This initializes the core registries and built-in parsers. The SDK auto-detects `.ktw` wire payloads and decodes them in under 2 ms.',
       code: `// In your Application class or root Composable
 Ketoy.initialize()
 
-// You can now render server-driven UI from local JSON
+// You can now render server-driven UI from .ktw wire bytes or JSON
+// Wire format is auto-detected — no extra configuration needed
 JSONStringToUI(value = myJsonString)`,
       language: 'kotlin',
     },
@@ -328,6 +329,43 @@ val cloudEnabled: Boolean = Ketoy.isCloudEnabled()
 // Get cloud config (null if not configured)
 val config: KetoyCloudConfig? = Ketoy.cloudConfig`,
       language: 'kotlin',
+    },
+    {
+      id: 'wire-format',
+      title: 'Wire Format (.ktw) — Migrated from JSON',
+      content: `Starting with **v0.1.6-beta**, Ketoy screens are compiled to the **Ketoy Wire format** (.ktw) instead of plain JSON. This is a transparent, backwards-compatible change — the SDK auto-detects the payload type via magic bytes and applies the correct decode pipeline automatically.
+
+### Why we moved away from JSON
+
+Plain JSON SDUI payloads have real costs: they are verbose, slow to parse on low-end devices, and expensive to transfer over metered connections. A typical 100-node screen weighs ~14 KB as JSON. After the .ktw pipeline, that same screen is ~1 KB — **10x smaller, decoded in under 2 ms**.
+
+### The 4-layer compression pipeline
+
+\`\`\`
+Kotlin DSL  →  KNode tree
+                  │
+       ┌──────────▼──────────┐
+       │  Layer 1: Key alias  │   "backgroundColor" → "bg"      (~1.5-2x)
+       │  Layer 2: Type IDs   │   "FloatingActionButton" → 35   (~1.2x)
+       │  Layer 3: MessagePack│   JSON text → binary            (~2-3x)
+       │  Layer 4: Gzip       │   DEFLATE on binary blob        (~4x)
+       └──────────────────────┘
+                  │
+              .ktw file   (10x smaller than original JSON)
+\`\`\`
+
+### Compression benchmarks
+
+| Screen complexity | Raw JSON | \`.ktw\` | Saved |
+|---|---|---|---|
+| Simple (30 nodes) | ~3.5 KB | ~300 B | 3.2 KB |
+| Medium (100 nodes) | ~14 KB | ~1 KB | 13 KB |
+| Complex (300 nodes) | ~42 KB | ~3 KB | 39 KB |
+| Full app (10 screens) | ~140 KB | ~10 KB | 130 KB |
+
+### No migration steps required
+
+The SDK auto-detects the format by inspecting the first two bytes of the payload. Existing apps that were previously sending raw JSON continue to work — the decoder falls through to the JSON path automatically. The new \`ketoyExport\` task now writes \`.ktw\` files instead of \`.json\` files.`,
     },
     {
       id: 'reset',

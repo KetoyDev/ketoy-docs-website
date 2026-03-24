@@ -96,6 +96,17 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Wire Format callout */}
+      <section className="home__install" style={{ paddingBottom: 0 }}>
+        <div style={{ background: 'rgba(92,107,192,0.08)', border: '1px solid rgba(92,107,192,0.25)', borderRadius: '10px', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+          <strong style={{ color: 'var(--color-primary, #5C6BC0)' }}>New in v0.1.4-beta-beta — Wire Format (.ktw)</strong>
+          <p style={{ margin: '0.4rem 0 0', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            Screens are now compiled to the <strong>.ktw</strong> Ketoy Wire format instead of plain JSON — <strong>10x smaller payloads, decoded in under 2 ms</strong>. The SDK auto-detects the format; no migration steps required.{' '}
+            <a href="/docs/initialization#wire-format" style={{ color: 'var(--color-primary, #5C6BC0)' }}>Learn more →</a>
+          </p>
+        </div>
+      </section>
+
       {/* Installation */}
       <section className="home__install">
         <h2>Installation</h2>
@@ -135,17 +146,17 @@ export default function Home() {
               <tr>
                 <td>Kotlin DSL</td>
                 <td><code>build.gradle.kts</code></td>
-                <td><code>0.1.3-beta.2</code></td>
+                <td><code>0.1.4-beta</code></td>
               </tr>
               <tr>
                 <td>Groovy DSL</td>
                 <td><code>build.gradle</code></td>
-                <td><code>0.1.3-beta.2</code></td>
+                <td><code>0.1.4-beta-beta</code></td>
               </tr>
               <tr>
                 <td>Version Catalog (TOML)</td>
                 <td><code>libs.versions.toml</code></td>
-                <td><code>0.1.3-beta.2</code></td>
+                <td><code>0.1.4-beta-beta</code></td>
               </tr>
             </tbody>
           </table>
@@ -159,7 +170,7 @@ export default function Home() {
           </p>
           <CodeBlock
             code={`plugins {
-    id("dev.ketoy.devtools") version "0.1.5-beta.10" apply false
+    id("dev.ketoy.devtools") version "0.1.6-beta" apply false
 }`}
             language="kotlin"
             title="build.gradle.kts"
@@ -168,7 +179,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Kotlin DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation("dev.ketoy:sdk:0.1.3-beta.2")
+    implementation("dev.ketoy:sdk:0.1.4-beta-beta")
 }`}
             language="kotlin"
             title="build.gradle.kts"
@@ -177,7 +188,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Groovy DSL</h4>
           <CodeBlock
             code={`dependencies {
-    implementation 'dev.ketoy:sdk:0.1.3-beta.2'
+    implementation 'dev.ketoy:sdk:0.1.4-beta-beta'
 }`}
             language="groovy"
             title="build.gradle"
@@ -186,7 +197,7 @@ export default function Home() {
           <h4 className="home__install-format-label">Version Catalog (TOML)</h4>
           <CodeBlock
             code={`[versions]
-ketoy = "0.1.3-beta.2"
+ketoy = "0.1.4-beta-beta"
 
 [libraries]
 ketoy-sdk = { group = "dev.ketoy", name = "sdk", version.ref = "ketoy" }`}

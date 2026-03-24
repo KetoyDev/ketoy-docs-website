@@ -339,27 +339,87 @@ KetoyCloudScreen(
     }
 )`,
     notes: 'If a KetoyScreen with the given screenName is already registered in KetoyScreenRegistry, this composable delegates to screen.Content(). Otherwise it falls back to a direct cloud fetch (legacy behaviour for screens not registered via ProvideKetoyScreen).',
-    seeAlso: ['KetoyCloudScreenFromJson', 'CloudScreenState', 'KetoyCloudService', 'FetchResult', 'KetoyCloud', 'KComponent'],
+    seeAlso: ['KetoyCloudScreenFromWireBytes', 'KetoyCloudScreenFromJson', 'CloudScreenState', 'KetoyCloudService', 'FetchResult', 'KetoyCloud', 'KComponent'],
   },
 
-  KetoyCloudScreenFromJson: {
-    name: 'KetoyCloudScreenFromJson',
-    kind: '@Composable function',
+  KetoyCloudScreenFromWireBytes: {
+    name: 'KetoyCloudScreenFromWireBytes',
+    kind: 'function',
     module: 'cloud',
     subpackage: 'screen',
     category: 'Cloud',
     subcategory: 'Cloud Screen',
-    description: 'Renders a pre-fetched Ketoy screen from a raw JSON string. Use when you have already fetched or constructed the screen JSON yourself (e.g. from a custom API, local file, or Room database) without any network call.',
+    description: 'Renders a pre-fetched Ketoy screen from compressed .ktw wire bytes. Use this composable when you have already fetched or constructed the screen data yourself and want Ketoy to render it without any network call. Accepts any format produced by the Ketoy wire pipeline (gzip+MessagePack, gzip-only, aliased JSON, or plain JSON) — format is auto-detected. This is the preferred alternative to KetoyCloudScreenFromJson for all new code.',
     android: {
       packageName: 'com.developerstring.ketoy.cloud',
       annotations: ['@Composable'],
       imports: [
         'import androidx.compose.foundation.layout.Box',
         'import androidx.compose.ui.Modifier',
-        'import com.developerstring.ketoy.renderer.JSONStringToUI',
+        'import com.developerstring.ketoy.cloud.KetoyCloudScreenFromWireBytes',
         'import com.developerstring.ketoy.theme.KetoyColorScheme',
       ],
       sourceCode: `@Composable
+fun KetoyCloudScreenFromWireBytes(
+    data: ByteArray,
+    modifier: Modifier = Modifier,
+    colorScheme: KetoyColorScheme? = null
+) {
+    Box(modifier = modifier) {
+        JSONBytesToUI(data = data, colorScheme = colorScheme)
+    }
+}`,
+    },
+    properties: [
+      { name: 'data', type: 'ByteArray', description: 'Compressed .ktw wire bytes. Any format produced by the Ketoy wire pipeline is accepted: the format is auto-detected from magic bytes.' },
+      { name: 'modifier', type: 'Modifier', default: 'Modifier', description: 'Optional Modifier applied to the root Box container.' },
+      { name: 'colorScheme', type: 'KetoyColorScheme?', default: 'null', description: 'Optional KetoyColorScheme for theming.' },
+    ],
+    methods: [],
+    innerClasses: [],
+    usage: `// Render wire bytes from a KNode DSL tree
+val wireBytes = KColumn { KText("Dashboard") }.toWireBytes()
+KetoyCloudScreenFromWireBytes(data = wireBytes)
+
+// With custom modifier and colour scheme
+KetoyCloudScreenFromWireBytes(
+    data = wireBytes,
+    modifier = Modifier.fillMaxSize(),
+    colorScheme = myKetoyColors
+)
+
+// Render from a bundled .ktw asset file
+val wireBytes = context.assets.open("screens/home.ktw").readBytes()
+KetoyCloudScreenFromWireBytes(data = wireBytes)`,
+    notes: 'Wire bytes are 10-15× smaller than equivalent JSON strings. Prefer this composable over KetoyCloudScreenFromJson for all production code. KetoyCloudScreenFromJson is deprecated.',
+    seeAlso: ['KetoyCloudScreen', 'KetoyCloudScreenFromJson', 'JSONBytesToUI', 'KetoyWireFormat'],
+  },
+
+  KetoyCloudScreenFromJson: {
+    name: 'KetoyCloudScreenFromJson',
+    kind: 'function',
+    module: 'cloud',
+    subpackage: 'screen',
+    category: 'Cloud',
+    subcategory: 'Cloud Screen',
+    description: '⚠️ Deprecated. Use KetoyCloudScreenFromWireBytes() instead. Renders a pre-fetched Ketoy screen from a raw JSON string. This function is marked @Deprecated in the SDK — it exists only for backward compatibility with code that was written before the wire format was introduced.',
+    android: {
+      packageName: 'com.developerstring.ketoy.cloud',
+      annotations: ['@Composable', '@Deprecated'],
+      imports: [
+        'import androidx.compose.foundation.layout.Box',
+        'import androidx.compose.ui.Modifier',
+        'import com.developerstring.ketoy.renderer.JSONStringToUI',
+        'import com.developerstring.ketoy.theme.KetoyColorScheme',
+      ],
+      sourceCode: `@Deprecated(
+    message = "Use KetoyCloudScreenFromWireBytes() with compressed wire bytes.",
+    replaceWith = ReplaceWith(
+        "KetoyCloudScreenFromWireBytes(data, modifier, colorScheme)",
+        "com.developerstring.ketoy.cloud.KetoyCloudScreenFromWireBytes"
+    )
+)
+@Composable
 fun KetoyCloudScreenFromJson(
     json: String,
     modifier: Modifier = Modifier,
@@ -371,17 +431,16 @@ fun KetoyCloudScreenFromJson(
 }`,
     },
     properties: [
-      { name: 'json', type: 'String', default: '—', description: 'The raw JSON string describing the Ketoy UI tree.' },
+      { name: 'json', type: 'String', description: 'The raw JSON string describing the Ketoy UI tree.' },
       { name: 'modifier', type: 'Modifier', default: 'Modifier', description: 'Optional Modifier applied to the root Box container.' },
       { name: 'colorScheme', type: 'KetoyColorScheme?', default: 'null', description: 'Optional KetoyColorScheme for theming.' },
     ],
-    usage: `val json = myRepository.getScreenJson("dashboard")
-KetoyCloudScreenFromJson(
-    json = json,
-    colorScheme = myKetoyColors
-)`,
-    notes: 'Expected JSON format: { "type": "Column", "children": [{ "type": "Text", "text": "Hello, World!" }] }',
-    seeAlso: ['KetoyCloudScreen', 'CloudScreenState', 'KetoyJsonUtils', 'KetoyJson'],
+    methods: [],
+    innerClasses: [],
+    usage: `// Deprecated — migrate to:
+KetoyCloudScreenFromWireBytes(data = wireBytes, colorScheme = myKetoyColors)`,
+    notes: 'This function is @Deprecated. Migrate to KetoyCloudScreenFromWireBytes() which accepts .ktw wire bytes instead of raw JSON strings. Wire bytes are 10-15× smaller.',
+    seeAlso: ['KetoyCloudScreenFromWireBytes', 'KetoyCloudScreen', 'JSONStringToUI'],
   },
 
   CloudScreenState: {

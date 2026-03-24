@@ -7,7 +7,7 @@
 const productionReleaseDoc = {
   id: 'production-release',
   title: 'Production Release',
-  description: 'Export production-ready screen and navigation JSON bundles with ketoyExport DSL, generate manifests, configure cloud credentials, and deploy screens with versioned push, rollback, and lifecycle management via Gradle tasks.',
+  description: 'Export production-ready screen .ktw wire bundles and navigation manifests with ketoyExport DSL, configure cloud credentials, and deploy screens with versioned push, rollback, and lifecycle management via Gradle tasks.',
   icon: 'FaRocket',
   order: 6,
   sections: [
@@ -15,7 +15,7 @@ const productionReleaseDoc = {
     {
       id: 'overview',
       title: 'Overview',
-      content: `The production pipeline takes your Kotlin DSL screens, serializes them to self-contained JSON bundles, writes index manifests, and optionally pushes them to the Ketoy Cloud API for over-the-air delivery.
+      content: `The production pipeline takes your Kotlin DSL screens, compiles them to self-contained \`.ktw\` wire bundles (**10× smaller than JSON**), writes index manifests, and optionally pushes them to the Ketoy Cloud API for over-the-air delivery.
 
 ### Production vs Dev Export
 
@@ -25,7 +25,7 @@ const productionReleaseDoc = {
 | **Output dir** | \`ketoy-screens/\` | \`ketoy-export/\` |
 | **Gradle task** | \`ketoyExport\` | \`ketoyExportProd\` |
 | **Test method** | \`exportForDevServer()\` | \`exportForProduction()\` |
-| **Manifests** | No | Yes (\`navigation_manifest.json\` + \`screen_manifest.json\`) |
+| **Manifests** | No | Yes (\`navigation_manifest.json\` + \`screen_manifest.json\`) — JSON index files |
 | **Purpose** | Live-reload during development | Ship to app assets / cloud |
 
 > **Note:** As of 0.1-beta.1, both dev and production exports use the same \`ketoyExport()\` DSL. No separate \`KetoyProductionExport\` class is needed.
@@ -34,7 +34,7 @@ const productionReleaseDoc = {
 
 | Task | Command | Description |
 |---|---|---|
-| \`ketoyExportProd\` | \`./gradlew ketoyExportProd\` | Export production JSON + manifests to \`ketoy-export/\` |
+| \`ketoyExportProd\` | \`./gradlew ketoyExportProd\` | Compile screens to \`.ktw\` wire files + manifests in \`ketoy-export/\` |
 | \`ketoyPush\` | \`./gradlew ketoyPush -PscreenName=home -Pversion=1.0.0\` | Upload a single screen to the cloud |
 | \`ketoyPushAll\` | \`./gradlew ketoyPushAll -Pversion=1.0.0\` | Upload all screens from \`ketoy-screens/\` |
 | \`ketoyListScreens\` | \`./gradlew ketoyListScreens\` | List deployed screens |
@@ -177,9 +177,9 @@ object AppExports {
           table: {
             headers: ['Parameter', 'Type', 'Default', 'Description'],
             rows: [
-              ['outputDir', 'File', '(required)', 'Target directory for JSON files.'],
-              ['clearExisting', 'Boolean', 'true', 'Remove existing .json files before writing.'],
-              ['writeManifests', 'Boolean', 'true', 'Generate navigation_manifest.json and screen_manifest.json.'],
+              ['outputDir', 'File', '(required)', 'Target directory for .ktw wire files and manifests.'],
+              ['clearExisting', 'Boolean', 'true', 'Remove existing .ktw wire files before writing.'],
+              ['writeManifests', 'Boolean', 'true', 'Generate navigation_manifest.json and screen_manifest.json (JSON index files).'],
             ],
           },
         },
@@ -201,15 +201,15 @@ object AppExports {
 
 \`\`\`
 ketoy-export/
-├── home.json                    # Screen JSONs
-├── profile.json
-├── analytics.json
-├── cards.json
-├── history_screen.json
-├── nav_main.json                # Navigation graph JSONs
+├── home.ktw                     # Screen wire files (10× smaller than JSON)
+├── profile.ktw
+├── analytics.ktw
+├── cards.ktw
+├── history_screen.ktw
+├── nav_main.json                # Navigation graph JSONs (remain JSON)
 ├── nav_demo.json
-├── navigation_manifest.json     # Nav graph index
-└── screen_manifest.json         # Screen index with metadata
+├── navigation_manifest.json     # Nav graph index (JSON)
+└── screen_manifest.json         # Screen index with metadata (JSON)
 \`\`\``,
         },
         {
@@ -237,14 +237,14 @@ ketoy-export/
             "screenName": "home",
             "displayName": "Home Screen",
             "version": "1.0.0",
-            "fileName": "home.json",
+            "fileName": "home.ktw",
             "contents": ["cards", "transactions"]
         },
         {
             "screenName": "profile",
             "displayName": "Profile Screen",
             "version": "1.0.0",
-            "fileName": "profile.json",
+            "fileName": "profile.ktw",
             "contents": ["main"]
         }
     ]
@@ -290,7 +290,7 @@ KETOY_PACKAGE_NAME=com.example.myapp`,
     {
       id: 'push-screens',
       title: 'Push Screens to Cloud',
-      content: `Upload screen JSON to the Ketoy Cloud API for over-the-air delivery.`,
+      content: `Upload screen \`.ktw\` wire payloads to the Ketoy Cloud API for over-the-air delivery.`,
       subsections: [
         {
           id: 'push-single',
@@ -319,7 +319,7 @@ KETOY_PACKAGE_NAME=com.example.myapp`,
           table: {
             headers: ['Parameter', 'Required', 'Description'],
             rows: [
-              ['-PscreenName', 'Yes', 'Name of the screen to push (must match a .json file in ketoy-screens/).'],
+              ['-PscreenName', 'Yes', 'Name of the screen to push (must match a .ktw file in ketoy-screens/).'],
               ['-Pversion', 'Yes', 'Semantic version string for this upload (e.g. "1.0.0", "1.2.0-beta").'],
               ['-PdisplayName', 'No', 'Human-readable name (defaults to screenName if omitted).'],
               ['-Pdescription', 'No', 'Optional description for the screen.'],
@@ -331,7 +331,7 @@ KETOY_PACKAGE_NAME=com.example.myapp`,
         {
           id: 'push-all',
           title: 'Push All Screens',
-          content: `Upload every \`.json\` file in \`ketoy-screens/\` at once:`,
+          content: `Upload every \`.ktw\` wire file in \`ketoy-screens/\` at once:`,
           code: `./gradlew ketoyPushAll -Pversion=1.0.0`,
           language: 'bash',
         },
@@ -351,7 +351,7 @@ x-developer-api-key: {KETOY_DEVELOPER_API_KEY}
 Content-Type: application/json
 \`\`\`
 
-and a JSON body containing the screen name, version, metadata, and the full screen JSON payload.`,
+and a multipart body containing the screen name, version, metadata, and the \`.ktw\` wire payload.`,
         },
       ],
     },
